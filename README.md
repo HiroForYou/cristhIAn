@@ -113,7 +113,7 @@ npm run test:e2e
 ```bash
 git add .
 git commit -m "first commit"
-git push https://github.com/HiroForYou/cristhIAn.git develop
+git push https://github.com/HiroForYou/cristhIAn develop
 ```
 
 ------
