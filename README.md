@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://anuraghazra.github.io/">
+  <a href="http://www.cristhianwiki.com/">
     <img alt="Gatsby" src="./src/static/logo_noalpha.svg" width="100" />
     <h2 align="center">Cristhian Wiki</h2>
   </a>

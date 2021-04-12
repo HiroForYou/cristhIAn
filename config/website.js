@@ -4,8 +4,8 @@ const meta = {
   siteDescription:
     'Cristhian Wiki - Creative ML enginner who loves pytorch and modern deep learning technologies.',
   siteTitleAlt: 'Cristhian Wiki',
-  siteShortName: 'cristhIA',
-  siteUrl: 'https://hiroforyou.github.io/cristhIAn/', // No trailing slash!
+  siteShortName: 'cristhIAn',
+  siteUrl: 'http://www.cristhianwiki.com/', // No trailing slash!
 };
 
 const social = {

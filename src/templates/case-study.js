@@ -16,7 +16,7 @@ import { InfoTitle, CaseStudyWrapper } from './case-study.style';
 
 const CaseStudy = ({ data }) => {
   const baseSlugUrl =
-    'https://hiroforyou.github.io/cristhIAn' + data.markdownRemark.fields.slug;
+    'http://www.cristhianwiki.com' + data.markdownRemark.fields.slug;
   const study = data.markdownRemark.frontmatter;
 
   const infoLinks = study.info.links && (
