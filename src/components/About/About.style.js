@@ -28,6 +28,7 @@ export const AboutInfo = styled.article`
 
   p {
     color: #f8f8f8;
+    font-size: 20px;
   }
 
   .about__link {

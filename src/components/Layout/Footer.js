@@ -28,14 +28,10 @@ const FooterWrapper = styled.footer`
 const Footer = () => (
   <FooterWrapper>
     <Wrapper>
-      <img width="35px" src={logo} alt="anurag hazra" />
+      <img width="35px" src={logo} alt="cristhian wiki" />
       <p style={{ float: 'right' }}>
-        Made with love and
-        <a href="https://gatsbyjs.org" target="__blank">
-          &nbsp;gatsby&nbsp;
-        </a>
-        by
-        <a href="https://github.com/anuraghazra" target="__blank">
+        Made with love by
+        <a href="https://github.com/hiroforyou" target="__blank">
           &nbsp;me
         </a>
       </p>

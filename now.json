@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "name": "Anurag Hazra",
+  "version": 1,
+  "name": "Cristhian Wiki",
   "builds": [
     {
       "src": "package.json",

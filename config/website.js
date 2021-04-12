@@ -1,24 +1,24 @@
 const meta = {
   // Metadata
-  siteTitle: 'Anurag Hazra - Creative Web Designer',
+  siteTitle: 'Cristhian Wiki - Machine Learning Engineer',
   siteDescription:
-    'Anurag Hazra - Creative frontEnd web developer who loves javascript and modern web technologies.',
-  siteTitleAlt: 'Anurag Hazra',
-  siteShortName: 'Anurag Hazra',
-  siteUrl: 'https://anuraghazra.github.io', // No trailing slash!
+    'Cristhian Wiki - Creative ML enginner who loves pytorch and modern deep learning technologies.',
+  siteTitleAlt: 'Cristhian Wiki',
+  siteShortName: 'cristhIA',
+  siteUrl: 'https://hiroforyou.github.io/cristhIAn/', // No trailing slash!
 };
 
 const social = {
   siteLogo: `src/static/logo.svg`,
   siteBanner: `${meta.siteUrl}/images/social-banner.png`,
-  twitter: '@anuraghazru',
+  twitter: '@HiroCharlie',
 };
 
-const website = {
+const website = { 
   ...meta,
   ...social,
-  disqusShortName: 'anuraghazra',
-  googleAnalyticsID: 'UA-119972196-1',
+  disqusShortName: 'https-hiroforyou-github-io-cristhian',
+  googleAnalyticsID: 'UA-194287994-1',
   // Manifest
   themeColor: '#6D83F2',
   backgroundColor: '#6D83F2',

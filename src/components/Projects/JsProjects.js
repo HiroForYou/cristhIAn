@@ -36,7 +36,7 @@ const JsProjects = () => {
 
   return (
     <JsProjectsWrapper>
-      <PageHeader>Javascript Libraries</PageHeader>
+      <PageHeader>Deep Learning with Javascript 💛</PageHeader>
 
       {jsprojects.allJsprojectsJson.edges.map(({ node }) => (
         <ProjectTemplate

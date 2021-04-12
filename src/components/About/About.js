@@ -19,37 +19,28 @@ const About = () => {
           <Avatar src="hfest_avatar_2.jpg" />
         </div>
         <p>
-          Hi, I'm Anurag Hazra, a passionate self-taught frontEnd web developer
-          from India, currently working at{' '}
-          <a className="about__link" href="https://timeless.co">
-            timeless.co
-          </a>{' '}
-          as a FrontEnd engineer. I tend to make use of modern web technologies
-          to build websites that look great, feel fantastic, and function
-          correctly. I am especially focusing on Reactjs.
-          <br />
-          <br />
-          I'm also a certified graphic designer from "Ramakrishna Mission
-          Shilpamandira". I also do Graphic and UI designing. Since I love both
-          programming and designing, I'm also interested in creating
-          programmatic designs and creative coding projects.
+        Hi, I'm Cristhian Wiki, a passionate machine learning engineer and self-taught researcher from Peru. I am a pytorch lover, very interested in the creation of novel neural network architectures (SOA), as well as their rapid implementation and accessibility (using MLOps tools).
+       <br/>
+       <br/>  
+        My goal as a human being is to be able to change the world and make it a better place (using deep learning and lots of creativity).
         </p>
       </AboutInfo>
 
       <Flex justify="space-between" className="quotes__wrapper">
         <Quote>
-          <p>“Simplicity is the baddest choice to be the best.“</p>
+          <p>“Any fool can write code that a computer understands. Good programmers write code that humans can understand.”</p>
+          <br />
+          <i>- Martin Fowler</i>
         </Quote>
-        <Quote>
-          <p>
-            “I know I’m not successful enough, but I’m passionate enough not to
-            worry about success.“
-          </p>
+        <Quote>          
+          <p>“Nothing interferes with my concentration. You could put on an orgy in my office and I wouldn't look up. Well, maybe once.”</p>
+          <br />
+          <i>- Isaac Asimov</i>
         </Quote>
-        <Quote>
-          <p>
-            “Creativity is the driver of an unstoppable train called Passion.”
-          </p>
+        <Quote>          
+          <p>“Somewhere, something incredible is waiting to be known.”</p>
+          <br />
+          <i>- Carl Sagan</i>
         </Quote>
       </Flex>
     </AboutWrapper>

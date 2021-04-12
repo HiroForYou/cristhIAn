@@ -13,6 +13,10 @@ import {
   faCodepen,
   faReact,
   faNode,
+  faPython,
+  faAws,
+  faDocker,
+  faLinkedin,
 } from '@fortawesome/free-brands-svg-icons';
 import {
   faPaintBrush,
@@ -29,6 +33,8 @@ import {
   faMoon,
   faSun,
   faEdit,
+  faRocket,
+  faRobot
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -36,6 +42,7 @@ library.add(
   faDribbble,
   faTwitter,
   faFacebook,
+  faLinkedin,
   faReddit,
   faPaintBrush,
   faWindowMaximize,
@@ -45,10 +52,13 @@ library.add(
   faPaperPlane,
   faHtml5,
   faCss3,
+  faPython,
+  faAws,
   faCodepen,
   faChevronRight,
   faChevronLeft,
   faClock,
+  faDocker,
   faCalendarAlt,
   faReact,
   faNode,
@@ -56,6 +66,8 @@ library.add(
   faTimes,
   faMoon,
   faSun,
-  faEdit
+  faEdit,
+  faRocket,
+  faRobot
 );
 config.autoAddCss = false;

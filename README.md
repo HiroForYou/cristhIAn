@@ -4,7 +4,7 @@
     <h2 align="center">Cristhian Wiki</h2>
   </a>
 </p> 
-<p align="center">Creative FrontEnd Web Developer</p>
+<p align="center">Machine Learning Engineer</p>
 
 [![Build Status](https://travis-ci.org/anuraghazra/anuraghazra.github.io.svg?branch=develop)](https://travis-ci.org/anuraghazra/anuraghazra.github.io)
 ![GitHub](https://img.shields.io/github/license/anuraghazra/anuraghazra.github.io)

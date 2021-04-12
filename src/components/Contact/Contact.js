@@ -26,7 +26,7 @@ function Contact() {
         </LeftContent>
         <ContactForm
           noValidate
-          action="https://formspree.io/hazru.anurag@gmail.com"
+          action="https://formspree.io/f/mgereqyk"
           method="POST"
         >
           <label className="label__email">
@@ -51,7 +51,7 @@ function Contact() {
               name="name"
               type="text"
               required
-              placeholder="John Doe"
+              placeholder="Yann LeCun"
             />
           </label>
           <label className="label__message">
