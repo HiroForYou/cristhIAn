@@ -3,6 +3,7 @@
   "private": true,
   "description": "Cristhian Wiki Portfolio Site",
   "version": "0.1.0",
+  "homepage": "https://www.cristhianwiki.com",
   "author": "Cristhian Wiki <christiansanchezsaune@gmail.com>",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.19",
@@ -75,7 +76,7 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "cd plugins/gatsby-plugin-social-banners && npm install",
-    "now-build": "npm run build",
+    "now-build": "npm run build && echo www.cristhianwiki.com > ./public/CNAME",
     "build": "gatsby build",
     "develop": "gatsby develop --host=0.0.0.0",
     "format": "prettier --write src/**/*.{js,jsx}",

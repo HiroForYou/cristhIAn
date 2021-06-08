@@ -22,7 +22,7 @@ _NOTE: The default branch for this repo is `develop`, when you push or pull make
 Fork the repository. then clone the repo locally by doing -
 
 ```bash
-git clone https://github.com/anuraghazra/anuraghazra.github.io.git
+git clone https://github.com/HiroForYou/cristhIAn.git
 ```
 
 ### Step 2: Install Dependencies
@@ -30,7 +30,7 @@ git clone https://github.com/anuraghazra/anuraghazra.github.io.git
 cd into the directory
 
 ```bash
-cd anuraghazra.github.io
+cd cristhIAn
 ```
 
 install all the dependencies
