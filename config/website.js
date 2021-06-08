@@ -10,7 +10,7 @@ const meta = {
 
 const social = {
   siteLogo: `src/static/logo.svg`,
-  //siteBanner: `${meta.siteUrl}/images/social-banner.png`,
+  siteBanner: `${meta.siteUrl}/images/social-banner.png`,
   twitter: '@HiroCharlie',
 };
 
