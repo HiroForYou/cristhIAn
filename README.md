@@ -6,14 +6,8 @@
 </p> 
 <p align="center">Machine Learning Engineer</p>
 
-[![Build Status](https://travis-ci.org/anuraghazra/anuraghazra.github.io.svg?branch=develop)](https://travis-ci.org/anuraghazra/anuraghazra.github.io)
-![GitHub](https://img.shields.io/github/license/anuraghazra/anuraghazra.github.io)
-![Website](https://img.shields.io/website?down_message=offline&label=site&up_message=online&url=http%3A%2F%2Fanuraghazra.github.io)
 
-
-![Anurag Hazra Site Preview](./src/static/screenshot.png)
-
-Strained eyes? There's DarkMode too :p
+![Cristhian Wiki](./src/static/screenshot.png)
 
 *NOTE: If you are using this site as a template for your own portfolio site, I would be very glad if you add a link to the original site with my name in footer*
 
