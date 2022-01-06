@@ -16,6 +16,8 @@ jobs:
         with:
           node-version: '14'
       - uses: enriikke/gatsby-gh-pages-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           access-token: ${{ secrets.cristhIAn }}
           deploy-branch: gh-pages
