@@ -5,7 +5,7 @@ const meta = {
     'Cristhian Wiki - Creative ML enginner who loves pytorch and modern deep learning technologies.',
   siteTitleAlt: 'Cristhian Wiki',
   siteShortName: 'cristhIAn',
-  siteUrl: 'http://www.cristhianwiki.com/', // No trailing slash!
+  siteUrl: 'https://www.cristhianwiki.com/', // No trailing slash!
 };
 
 const social = {
@@ -14,7 +14,7 @@ const social = {
   twitter: '@HiroCharlie',
 };
 
-const website = { 
+const website = {
   ...meta,
   ...social,
   disqusShortName: 'https-hiroforyou-github-io-cristhian',
@@ -23,6 +23,5 @@ const website = {
   themeColor: '#6D83F2',
   backgroundColor: '#6D83F2',
 };
-
 
 module.exports = website;
