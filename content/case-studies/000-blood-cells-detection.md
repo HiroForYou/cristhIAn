@@ -53,7 +53,7 @@ To be a first step, it was good, but we ran into a lot of problems. In the first
 
 Although we have many problems to solve, we also have an advance of possible solutions, which I will list below (to be able to perform in a second improved version of our system):
 
-- Using a distilled version of Yolo
+- Using a distilled version of YOLO
 - Use a faster backbone
 - Keep trying to quantize the model
 - Use a newer model, different from Yolo, and that has a shorter time (a distilled version of DERT possibly)
