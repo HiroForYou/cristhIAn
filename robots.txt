@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /goodies
+Sitemap: https://www.cristhianwiki.com//sitemap.xml
+Host: https://www.cristhianwiki.com
