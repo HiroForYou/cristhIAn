@@ -14,11 +14,10 @@ jobs:
       - name: Node Config
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
-      - uses: enriikke/gatsby-gh-pages-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          node-version: "14"
+      - uses: peaceiris/actions-gh-pages@v3
         with:
           access-token: ${{ secrets.cristhIAn }}
-          deploy-branch: gh-pages
-          gatsby-args: --prefix-paths
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          cname: www.cristhianwiki.com

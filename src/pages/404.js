@@ -8,9 +8,9 @@ import Link from 'gatsby-link';
 const NotFoundPage = () => (
   <Layout>
     <SEO title="404: Not found" />
-    <h1>Opps, seems like you are lost!</h1>
+    <h1>Upss, parace que estas perdido!</h1>
     <p>
-      Mind going back? or <Link to="/blog">read some blogs</Link>
+      Piensas regresar? o <Link to="/blog">deseas leer mi blog</Link>
     </p>
   </Layout>
 );
