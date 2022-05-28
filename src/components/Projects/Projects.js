@@ -1,7 +1,16 @@
 import React from 'react';
 import { useStaticQuery, graphql, Link } from 'gatsby';
 import styled from 'styled-components';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  fab,
+  faHtml5,
+  faJs,
+  faCss3,
+  faPython,
+  faGithub,
+} from '@fortawesome/free-brands-svg-icons';
 
 import PageHeader from '@common/PageHeader';
 import IFrame from '@common/IFrame';
@@ -12,6 +21,8 @@ import JsProjects from './JsProjects';
 
 import ProjectTemplate from './ProjectTemplate';
 import { ProjectLinks, ProjectPreview, Tags } from './ProjectTemplate.style';
+
+library.add(fab, faJs, faCss3, faPython, faGithub, faHtml5);
 
 const ProjectsWrapper = styled.section`
   ${props => props.theme.spacing.sectionBottom};

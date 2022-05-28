@@ -1,5 +1,15 @@
 import React from 'react';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  fab,
+  faHtml5,
+  faJs,
+  faCss3,
+  faPython,
+  faGithub,
+} from '@fortawesome/free-brands-svg-icons';
+//import { faJs, faCss3, faPython, faGithub } from '@fortawesome/free-solid-svg-icons';
 
 import { render, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
@@ -17,6 +27,8 @@ import {
   Tags,
 } from '@src/components/Projects/ProjectTemplate.style';
 
+library.add(fab, faJs, faCss3, faPython, faGithub, faHtml5);
+
 afterEach(cleanup);
 
 test('should have title and description', () => {
@@ -26,8 +38,8 @@ test('should have title and description', () => {
         key={0}
         title={'Project Title'}
         desc={'Project description'}
-        links={null}
-        preview={null}
+        links={''}
+        preview={''}
       />
     </ThemeProvider>
   );
@@ -79,9 +91,10 @@ test('should have links and preview', () => {
               src={node.frontmatter.iframe}
             />
             <Tags>
-              <FontAwesomeIcon icon={['fab', 'js']} />
               <FontAwesomeIcon icon={['fab', 'html5']} />
               <FontAwesomeIcon icon={['fab', 'css3']} />
+              <FontAwesomeIcon icon={['fab', 'python']} />
+              <FontAwesomeIcon icon={['fab', 'js']} />
             </Tags>
           </ProjectPreview>
         }
