@@ -1,23 +1,39 @@
-name: Gatsby Publish
+name: GitHub Pages
 
 on:
   push:
     branches:
-      - develop
+      - develop # Set a branch name to trigger deployment
+  pull_request:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          submodules: true # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
       - name: Node Config
         uses: actions/setup-node@v2
         with:
           node-version: "14"
-      - uses: peaceiris/actions-gh-pages@v3
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
         with:
-          access-token: ${{ secrets.cristhIAn }}
+          hugo-version: "0.85.0"
+
+      - name: Build
+        run: hugo --minify
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.cristhIAn }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
           cname: www.cristhianwiki.com
