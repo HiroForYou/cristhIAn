@@ -1,0 +1,2 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[6],{w2l6:function(e,a,t){"use strict";t.r(a);var n=t("q1tI"),r=t.n(n),l=t("yBb5"),s=t("vrFN"),o=t("+ZDr"),c=t.n(o);a.default=function(){return r.a.createElement(l.a,null,r.a.createElement(s.a,{title:"404: Not found"}),r.a.createElement("h1",null,"Upss, parace que estas perdido!"),r.a.createElement("p",null,"Piensas regresar? o ",r.a.createElement(c.a,{to:"/blog"},"deseas leer mi blog")))}}}]);
+//# sourceMappingURL=component---src-pages-404-js-c50a849434da75695711.js.map
