@@ -15,20 +15,28 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true # Fetch Hugo themes (true OR recursive)
-          fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
-      - name: Node Config
-        uses: actions/setup-node@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
           node-version: "14"
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
         with:
-          hugo-version: "0.85.0"
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: npm ci
+      - run: npm run format
+      - run: npm run test
+      - run: npm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/develop' }}
         with:
           personal_token: ${{ secrets.cristhIAn }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
