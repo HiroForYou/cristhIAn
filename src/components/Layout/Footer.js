@@ -32,7 +32,7 @@ const Footer = () => (
       <p style={{ float: 'right' }}>
         Made with love by
         <a href="https://github.com/hiroforyou" target="__blank">
-          &nbsp;me
+          &nbsp;HiroForYou
         </a>
       </p>
     </Wrapper>
