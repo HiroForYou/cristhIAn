@@ -66,6 +66,20 @@ import smallProjects from '@/data/smallprojects.json';
     right: 50%;
     margin-left: -50vw;
     margin-right: -50vw;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 60px,
+      black calc(100% - 60px),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 60px,
+      black calc(100% - 60px),
+      transparent
+    );
   }
 
   .carousel__track {
@@ -75,8 +89,8 @@ import smallProjects from '@/data/smallprojects.json';
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    scroll-padding-inline: 24px;
-    padding: 0 24px 8px;
+    scroll-padding-inline: 5vw;
+    padding: 0 5vw 8px;
     scrollbar-width: none;
   }
 
@@ -85,7 +99,7 @@ import smallProjects from '@/data/smallprojects.json';
   }
 
   .carousel__slide {
-    flex: 0 0 82%;
+    flex: 0 0 260px;
     scroll-snap-align: center;
   }
 
@@ -136,13 +150,13 @@ import smallProjects from '@/data/smallprojects.json';
 
   @media (min-width: 640px) {
     .carousel__slide {
-      flex-basis: 45%;
+      flex-basis: 300px;
     }
   }
 
   @media (min-width: 1000px) {
     .carousel__slide {
-      flex-basis: 31%;
+      flex-basis: 320px;
     }
   }
 </style>

@@ -11,7 +11,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   --radius-card: 12px;
-  --content-width: 860px;
+  --content-width: 1240px;
   --section-spacing: clamp(64px, 10vw, 120px);
 }
 
@@ -25,6 +25,7 @@ html {
   scroll-behavior: smooth;
   scrollbar-color: var(--color-primary) var(--color-bg);
   scrollbar-width: thin;
+  overflow-x: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -44,6 +45,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
@@ -87,10 +89,15 @@ kbd {
 }
 
 .container {
-  width: 100%;
+  width: 90%;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 24px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 92%;
+  }
 }
 
 section {
