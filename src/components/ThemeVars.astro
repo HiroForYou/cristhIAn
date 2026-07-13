@@ -1,0 +1,26 @@
+---
+import { palettes } from '@/config/palettes.js';
+
+const cssBlocks = Object.entries(palettes)
+  .map(
+    ([name, p]) => `
+:root[data-theme="${name}"] {
+  --color-bg: ${p.bg};
+  --color-surface: ${p.surface};
+  --color-border: ${p.border};
+  --color-text: ${p.text};
+  --color-text-muted: ${p.textMuted};
+  --color-primary: ${p.primary};
+  --color-primary-light: ${p.primaryLight};
+  --color-primary-hover: ${p.primaryHover};
+  --color-tag-bg: ${p.tagBg};
+  --color-tag-border: ${p.tagBorder};
+  --color-overlay: ${p.overlay};
+  --color-nav-bg: ${p.navBg};
+  --gradient-primary: ${p.gradient};
+}`
+  )
+  .join('\n');
+---
+
+<style set:html={cssBlocks} />

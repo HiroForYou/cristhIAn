@@ -4,16 +4,9 @@
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/600.css';
 
+/* Color tokens (--color-*, --gradient-primary) come from ThemeVars.astro,
+   generated from src/config/palettes.js and scoped by [data-theme]. */
 :root {
-  --color-bg: #0d0d1a;
-  --color-surface: #1a1a2e;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-text: #e5e5f0;
-  --color-text-muted: #9797ab;
-  --color-orange: #ee4c2c;
-  --color-lilac: #a855f7;
-  --gradient-flame: linear-gradient(135deg, var(--color-orange), var(--color-lilac));
-
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
@@ -56,12 +49,12 @@ p {
 }
 
 a {
-  color: var(--color-orange);
+  color: var(--color-primary);
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--color-lilac);
+  color: var(--color-primary-light);
 }
 
 code,
@@ -86,7 +79,7 @@ section {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   letter-spacing: 0.04em;
-  color: var(--color-lilac);
+  color: var(--color-primary-light);
   text-transform: uppercase;
   margin-bottom: 12px;
 }
@@ -115,13 +108,13 @@ section {
 }
 
 .btn-primary {
-  background: var(--color-orange);
+  background: var(--color-primary);
   color: #fff;
 }
 
 .btn-primary:hover {
   color: #fff;
-  background: #d8431f;
+  background: var(--color-primary-hover);
 }
 
 .btn-secondary {
@@ -131,7 +124,7 @@ section {
 }
 
 .btn-secondary:hover {
-  border-color: var(--color-lilac);
+  border-color: var(--color-primary-light);
   color: var(--color-text);
 }
 
@@ -139,9 +132,9 @@ section {
   display: inline-block;
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: var(--color-lilac);
-  background: rgba(168, 85, 247, 0.1);
-  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: var(--color-primary-light);
+  background: var(--color-tag-bg);
+  border: 1px solid var(--color-tag-border);
   border-radius: 999px;
   padding: 3px 10px;
 }

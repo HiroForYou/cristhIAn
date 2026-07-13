@@ -14,8 +14,8 @@ const FlameLogo = () => (
   <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
     <defs>
       <linearGradient id="navFlame" x1="4" y1="30" x2="28" y2="2" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="#ee4c2c" />
-        <stop offset="1" stopColor="#a855f7" />
+        <stop offset="0" style={{ stopColor: 'var(--color-primary)' }} />
+        <stop offset="1" style={{ stopColor: 'var(--color-primary-light)' }} />
       </linearGradient>
     </defs>
     <path

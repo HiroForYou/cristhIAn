@@ -92,12 +92,16 @@ const items = await Promise.all(
   .concept-lightbox {
     position: fixed;
     inset: 0;
-    background: rgba(13, 13, 26, 0.92);
+    background: var(--color-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     padding: 32px;
+  }
+
+  .concept-lightbox[hidden] {
+    display: none;
   }
 
   .concept-lightbox img {

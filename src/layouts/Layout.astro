@@ -1,5 +1,8 @@
 ---
 import '@/styles/global.css';
+import ThemeVars from '@/components/ThemeVars.astro';
+import ThemeToggle from '@/components/ThemeToggle.astro';
+import { defaultPalette } from '@/config/palettes.js';
 
 interface Props {
   title?: string;
@@ -17,7 +20,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme={defaultPalette}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,8 +39,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(image, Astro.site)} />
+
+    <ThemeVars />
+    {import.meta.env.DEV && (
+      <script is:inline>
+        const saved = localStorage.getItem('dev-theme');
+        if (saved) document.documentElement.dataset.theme = saved;
+      </script>
+    )}
   </head>
   <body>
     <slot />
+    {import.meta.env.DEV && <ThemeToggle />}
   </body>
 </html>

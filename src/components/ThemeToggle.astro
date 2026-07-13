@@ -1,0 +1,73 @@
+---
+import { palettes, paletteNames } from '@/config/palettes.js';
+---
+
+<div class="theme-toggle" id="theme-toggle">
+  <span>Palette (dev only):</span>
+  {
+    paletteNames.map(name => (
+      <button type="button" data-palette={name}>
+        {palettes[name].label}
+      </button>
+    ))
+  }
+</div>
+
+<style>
+  .theme-toggle {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+  }
+
+  .theme-toggle button {
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text);
+    border-radius: 999px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .theme-toggle button[data-active='true'] {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+</style>
+
+<script>
+  const container = document.getElementById('theme-toggle');
+  const buttons = container?.querySelectorAll('button');
+
+  const markActive = () => {
+    const current = document.documentElement.dataset.theme;
+    buttons?.forEach(btn => {
+      btn.setAttribute('data-active', String(btn.dataset.palette === current));
+    });
+  };
+
+  buttons?.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const palette = btn.dataset.palette ?? '';
+      document.documentElement.dataset.theme = palette;
+      localStorage.setItem('dev-theme', palette);
+      markActive();
+    });
+  });
+
+  markActive();
+</script>
