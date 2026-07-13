@@ -1,8 +1,28 @@
 ---
 import { techStack } from '@/data/techstack.js';
+
+const wordCloud = [
+  { text: 'TensorFlow', top: '5%', left: '78%', size: '1.3rem' },
+  { text: 'Kubeflow', top: '0%', left: '4%', size: '1.4rem' },
+  { text: 'CUDA', top: '55%', left: '2%', size: '0.9rem' },
+  { text: 'MLflow', top: '30%', left: '38%', size: '1.1rem' },
+  { text: 'PyTorch', top: '8%', left: '48%', size: '0.85rem' },
+  { text: 'ONNX', top: '68%', left: '85%', size: '1.1rem' },
+  { text: 'Flask', top: '62%', left: '62%', size: '1.1rem' },
+  { text: 'PyTorch Lightning', top: '78%', left: '18%', size: '1.2rem' },
+  { text: 'Captum', top: '22%', left: '18%', size: '0.85rem' },
+];
 ---
 
 <section id="tech-stack">
+  <div class="tech-stack__cloud" aria-hidden="true">
+    {
+      wordCloud.map(word => (
+        <span style={`top:${word.top}; left:${word.left}; font-size:${word.size};`}>{word.text}</span>
+      ))
+    }
+  </div>
+
   <div class="container">
     <p class="eyebrow">Toolbox</p>
     <h2>Tech Stack</h2>
@@ -25,6 +45,46 @@ import { techStack } from '@/data/techstack.js';
 </section>
 
 <style>
+  #tech-stack {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tech-stack__cloud {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .tech-stack__cloud span {
+    position: absolute;
+    font-weight: 900;
+    color: var(--color-primary-light);
+    opacity: 0.08;
+    white-space: nowrap;
+    animation: tech-stack-float 8s ease-in-out infinite;
+  }
+
+  .tech-stack__cloud span:nth-child(even) {
+    animation-direction: reverse;
+    animation-duration: 10s;
+  }
+
+  @keyframes tech-stack-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  #tech-stack .container {
+    position: relative;
+    z-index: 1;
+  }
+
   .tech-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

@@ -5,7 +5,6 @@ const links = [
   { href: '/#about', label: 'About' },
   { href: '/#experience', label: 'Experience' },
   { href: '/#projects', label: 'Projects' },
-  { href: '/#concepts', label: 'Concepts' },
   { href: '/blog', label: 'Blog' },
   { href: '/#contact', label: 'Contact' },
 ];
@@ -45,7 +44,7 @@ const Navbar = () => {
         </nav>
 
         <button
-          className="navbar__toggle"
+          className={`navbar__toggle${isOpen ? ' is-open' : ''}`}
           aria-label="Toggle menu"
           aria-expanded={isOpen}
           onClick={() => setIsOpen(open => !open)}

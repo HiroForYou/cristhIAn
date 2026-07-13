@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import avatar from '@/assets/avatar-photo.jpg';
+import SkewBg from './SkewBg.astro';
 
 const quotes = [
   {
@@ -18,7 +19,8 @@ const quotes = [
 ];
 ---
 
-<section id="about">
+<section id="about" class="about-section">
+  <SkewBg />
   <div class="container about">
     <p class="eyebrow">Who I am</p>
     <h2>About Me</h2>
@@ -51,6 +53,10 @@ const quotes = [
 </section>
 
 <style>
+  .about-section {
+    position: relative;
+  }
+
   .about__intro {
     display: flex;
     align-items: center;

@@ -1,0 +1,165 @@
+---
+const age = new Date().getFullYear() - 1998;
+const swatches = ['var(--color-primary)', '#6a98f0', 'var(--gradient-primary)', '#f8f8f8', 'var(--color-surface)'];
+---
+
+<div class="hero-card">
+  <pre class="hero-card__code"><span>1&nbsp;&nbsp;class <b>Person</b> {'{'}</span
+    ><span>2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; constructor() {'{'}</span
+    ><span
+      >3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.name = "<b>Cristhian Wiki</b>";</span
+    ><span
+      >4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.traits = ["<b>RESEARCH</b>", "<b
+        >DEV</b
+      >"];</span
+    ><span>5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.age = {age};</span
+    ><span>6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {'}'}</span><span>7&nbsp;&nbsp;{'}'}</span
+  ></pre>
+
+  <div class="hero-card__palette">
+    {
+      swatches.map(color => (
+        <button type="button" class="hero-card__swatch" style={`background:${color}`} data-color={color} aria-label={`Copy color ${color}`}>
+          <span class="hero-card__tooltip">Copied</span>
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .hero-card {
+    position: relative;
+    flex-shrink: 0;
+    animation: hero-card-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+
+  @keyframes hero-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero-card__code {
+    margin: 0;
+    padding: 28px 32px;
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    white-space: pre;
+    min-width: 320px;
+  }
+
+  .hero-card__palette {
+    position: absolute;
+    bottom: -34px;
+    left: -40px;
+    display: flex;
+    gap: 6px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .hero-card__swatch {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .hero-card__swatch:hover {
+    transform: scale(1.1);
+  }
+
+  .hero-card__swatch:active {
+    transform: scale(0.9);
+  }
+
+  .hero-card__tooltip {
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hero-card__swatch.copied .hero-card__tooltip {
+    animation: hero-card-tooltip 1s ease forwards;
+  }
+
+  @keyframes hero-card-tooltip {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(4px);
+    }
+    20% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .hero-card {
+      margin-top: 48px;
+      align-self: center;
+    }
+
+    .hero-card__code {
+      min-width: 0;
+      font-size: 0.72rem;
+    }
+
+    .hero-card__palette {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.hero-card__swatch').forEach(button => {
+    button.addEventListener('click', async () => {
+      const color = button.getAttribute('data-color') ?? '';
+      try {
+        await navigator.clipboard.writeText(color);
+      } catch {
+        // clipboard API unavailable — swallow, the tooltip still gives feedback
+      }
+      button.classList.remove('copied');
+      // restart the animation
+      void button.offsetWidth;
+      button.classList.add('copied');
+    });
+  });
+</script>
