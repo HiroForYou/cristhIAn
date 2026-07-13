@@ -38,5 +38,13 @@
       "src": "https://github.com/HiroForYou/Deep-Learning-Collection"
     },
     "description": "Implementations to learn about ML, DL, PyTorch and TensorFlow from basic to advanced level."
+  },
+  {
+    "title": "Mnist with Onnx 💛",
+    "links": {
+      "demo": "https://vgzep.csb.app",
+      "src": "https://github.com/HiroForYou/pytorch-to-javascript-with-onnx-js"
+    },
+    "description": "Running mnist digits classifier in the browser using ONNX.js."
   }
 ]

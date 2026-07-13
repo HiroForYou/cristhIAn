@@ -61,6 +61,7 @@ import smallProjects from '@/data/smallprojects.json';
     display: flex;
     gap: 16px;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     padding-bottom: 8px;
@@ -145,7 +146,11 @@ import smallProjects from '@/data/smallprojects.json';
 
   function goTo(index) {
     const slide = slides[index];
-    slide?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (!track || !slide) return;
+    // Scroll the track's own scrollLeft directly (never scrollIntoView: it can
+    // escape to the document/window and yank the whole page around vertically).
+    const targetLeft = slide.offsetLeft - (track.clientWidth - slide.clientWidth) / 2;
+    track.scrollTo({ left: targetLeft, behavior: 'smooth' });
   }
 
   function setActive(index) {

@@ -3,6 +3,7 @@ import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
 import { getCollection, render } from 'astro:content';
+import { slugify } from '@/utils/slugify.js';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -29,16 +30,41 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
       <p class="post__date">{dateFormatter.format(post.data.date)} · {post.data.author}</p>
       <h1>{post.data.title}</h1>
       <div class="post__tags">
-        {post.data.tags.map(tag => <span class="tag">{tag}</span>)}
+        {post.data.tags.map(tag => (
+          <a class="tag" href={`/blog/tags/${slugify(tag)}/`}>
+            {tag}
+          </a>
+        ))}
       </div>
 
       <div class="post__content">
         <Content />
       </div>
+
+      <div id="disqus_thread" class="post__comments"></div>
     </article>
   </main>
   <Footer />
 </Layout>
+
+<script define:vars={{
+  shortname: 'https-hiroforyou-github-io-cristhian',
+  identifier: post.slug,
+  url: new URL(Astro.url.pathname, Astro.site).toString(),
+  title: post.data.title,
+}}>
+  window.disqus_config = function () {
+    this.page.url = url;
+    this.page.identifier = identifier;
+    this.page.title = title;
+  };
+  (function () {
+    const script = document.createElement('script');
+    script.src = `https://${shortname}.disqus.com/embed.js`;
+    script.setAttribute('data-timestamp', String(+new Date()));
+    (document.head || document.body).appendChild(script);
+  })();
+</script>
 
 <style>
   .post {
@@ -81,5 +107,11 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 
   .post__content :global(a) {
     color: var(--color-primary);
+  }
+
+  .post__comments {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--color-border);
   }
 </style>

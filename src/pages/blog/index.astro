@@ -3,6 +3,7 @@ import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
 import { getCollection } from 'astro:content';
+import { slugify } from '@/utils/slugify.js';
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -26,15 +27,21 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
         {
           posts.map(post => (
             <li>
-              <a class="card" href={`/blog/${post.slug}/`}>
+              <div class="card blog-index__card">
                 <span class="blog-index__date">{dateFormatter.format(post.data.date)}</span>
-                <h2>{post.data.title}</h2>
+                <h2>
+                  <a class="blog-index__title-link" href={`/blog/${post.slug}/`}>
+                    {post.data.title}
+                  </a>
+                </h2>
                 <div class="blog-index__tags">
                   {post.data.tags.map(tag => (
-                    <span class="tag">{tag}</span>
+                    <a class="tag" href={`/blog/tags/${slugify(tag)}/`}>
+                      {tag}
+                    </a>
                   ))}
                 </div>
-              </a>
+              </div>
             </li>
           ))
         }
@@ -58,14 +65,23 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     gap: 16px;
   }
 
-  .blog-index__list a {
-    display: block;
+  .blog-index__card {
+    position: relative;
+    transition: border-color 0.15s ease;
+  }
+
+  .blog-index__card:hover {
+    border-color: var(--color-primary-light);
+  }
+
+  .blog-index__title-link {
     color: var(--color-text);
   }
 
-  .blog-index__list a:hover {
-    color: var(--color-text);
-    border-color: var(--color-primary-light);
+  .blog-index__title-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
   }
 
   .blog-index__list h2 {
@@ -80,6 +96,8 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   }
 
   .blog-index__tags {
+    position: relative;
+    z-index: 1;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
