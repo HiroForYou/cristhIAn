@@ -3,7 +3,8 @@ name: GitHub Pages
 on:
   push:
     branches:
-      - develop # Set a branch name to trigger deployment
+      - develop # production deploy
+      - astro-migration # build validation while the redesign is in progress
   pull_request:
 
 jobs:
@@ -16,23 +17,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "20"
+          cache: pnpm
 
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - run: npm ci
-      - run: npm run format
-      - run: npm run test
-      - run: npm run build
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
@@ -40,5 +37,5 @@ jobs:
         with:
           personal_token: ${{ secrets.cristhIAn }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./dist
           cname: www.cristhianwiki.com

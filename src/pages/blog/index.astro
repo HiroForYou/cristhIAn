@@ -1,0 +1,87 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Navbar from '@/components/Navbar.jsx';
+import Footer from '@/components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<Layout title="Blog — Cristhian Wiki">
+  <Navbar client:load />
+  <main>
+    <section class="container blog-index">
+      <p class="eyebrow">Writing</p>
+      <h1>Blog</h1>
+
+      <ul class="blog-index__list">
+        {
+          posts.map(post => (
+            <li>
+              <a class="card" href={`/blog/${post.slug}/`}>
+                <span class="blog-index__date">{dateFormatter.format(post.data.date)}</span>
+                <h2>{post.data.title}</h2>
+                <div class="blog-index__tags">
+                  {post.data.tags.map(tag => (
+                    <span class="tag">{tag}</span>
+                  ))}
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .blog-index {
+    padding-top: 64px;
+  }
+
+  .blog-index__list {
+    list-style: none;
+    margin: 32px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .blog-index__list a {
+    display: block;
+    color: var(--color-text);
+  }
+
+  .blog-index__list a:hover {
+    color: var(--color-text);
+    border-color: var(--color-lilac);
+  }
+
+  .blog-index__list h2 {
+    font-size: 1.25rem;
+    margin: 8px 0;
+  }
+
+  .blog-index__date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .blog-index__tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+</style>

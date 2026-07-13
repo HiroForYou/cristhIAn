@@ -1,0 +1,46 @@
+---
+import { techStack } from '@/data/techstack.js';
+---
+
+<section id="tech-stack">
+  <div class="container">
+    <p class="eyebrow">Toolbox</p>
+    <h2>Tech Stack</h2>
+
+    <div class="tech-grid">
+      {
+        techStack.map(group => (
+          <div class="tech-group card">
+            <h3>{group.category}</h3>
+            <div class="tech-group__items">
+              {group.items.map(item => (
+                <span class="tag">{item}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .tech-group h3 {
+    font-size: 1rem;
+    color: var(--color-text);
+    margin-bottom: 14px;
+  }
+
+  .tech-group__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>

@@ -1,0 +1,41 @@
+---
+const EMAIL = 'christiansanchezsaune@gmail.com';
+const LINKEDIN_URL = 'https://linkedin.com/in/cristhian-wiki/';
+---
+
+<section id="contact">
+  <div class="container contact__inner">
+    <p class="eyebrow">Get in touch</p>
+    <h2>Contact</h2>
+    <p class="contact__text">
+      Open to interesting ML/AI conversations, collaborations, or opportunities.
+      Reach out directly:
+    </p>
+
+    <div class="contact__links">
+      <a class="btn btn-primary" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+      <a class="btn btn-secondary" href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+        LinkedIn
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact__inner {
+    text-align: center;
+    max-width: 560px;
+  }
+
+  .contact__text {
+    color: var(--color-text-muted);
+  }
+
+  .contact__links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 24px;
+  }
+</style>

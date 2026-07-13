@@ -1,0 +1,22 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Navbar from '@/components/Navbar.jsx';
+import Hero from '@/components/Hero.astro';
+import Experience from '@/components/Experience.astro';
+import TechStack from '@/components/TechStack.astro';
+import Blog from '@/components/Blog.astro';
+import Contact from '@/components/Contact.astro';
+import Footer from '@/components/Footer.astro';
+---
+
+<Layout>
+  <Navbar client:load />
+  <main>
+    <Hero />
+    <Experience />
+    <TechStack />
+    <Blog />
+    <Contact />
+  </main>
+  <Footer />
+</Layout>

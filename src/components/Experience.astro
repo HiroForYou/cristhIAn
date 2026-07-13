@@ -1,0 +1,100 @@
+---
+import { experience } from '@/data/experience.js';
+---
+
+<section id="experience">
+  <div class="container">
+    <p class="eyebrow">Career</p>
+    <h2>Experience</h2>
+
+    <ol class="timeline">
+      {
+        experience.map(entry => (
+          <li class="timeline__item">
+            <span class="timeline__dot" />
+            <div class="timeline__content card">
+              <div class="timeline__head">
+                <h3>{entry.role}</h3>
+                <span class="timeline__date">{entry.dateRange}</span>
+              </div>
+              <p class="timeline__company">{entry.company}</p>
+              <ul>
+                {entry.bullets.map(bullet => <li>{bullet}</li>)}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    list-style: none;
+    margin: 32px 0 0;
+    padding: 0;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--color-border);
+  }
+
+  .timeline__item {
+    position: relative;
+    padding-left: 32px;
+    margin-bottom: 24px;
+  }
+
+  .timeline__dot {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--color-lilac);
+  }
+
+  .timeline__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .timeline__head h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .timeline__date {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .timeline__company {
+    color: var(--color-orange);
+    font-weight: 600;
+    margin: 4px 0 12px;
+  }
+
+  .timeline__content ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--color-text-muted);
+  }
+
+  .timeline__content li {
+    margin-bottom: 6px;
+  }
+</style>

@@ -1,13 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "checkJs": false,
     "paths": {
-      "@src/*": ["src/*"],
-      "@common/*": ["src/components/common/*"],
+      "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
-      "@pages/*": ["src/pages/*"]
+      "@layouts/*": ["src/layouts/*"]
     }
-  },
-  "checkJs": true,
-  "exclude": ["dist", "node_modules", ".cache", "public"]
+  }
 }

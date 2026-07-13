@@ -1,0 +1,25 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Navbar from '@/components/Navbar.jsx';
+import Footer from '@/components/Footer.astro';
+---
+
+<Layout title="404 — Cristhian Wiki">
+  <Navbar client:load />
+  <main>
+    <section class="container not-found">
+      <p class="eyebrow">404</p>
+      <h1>Page not found</h1>
+      <p>The page you're looking for doesn't exist.</p>
+      <a class="btn btn-primary" href="/">Back home</a>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .not-found {
+    padding-top: 96px;
+    text-align: center;
+  }
+</style>
