@@ -5,34 +5,36 @@ import smallProjects from '@/data/smallprojects.json';
 <div class="small-projects">
   <div class="small-projects__skew" aria-hidden="true"></div>
 
-  <div class="small-projects__inner container">
+  <div class="container">
     <h3 class="small-projects__title">Small Projects</h3>
+  </div>
 
-    <div class="carousel" id="small-projects-carousel">
-      <div class="carousel__track">
-        {
-          smallProjects.map(project => (
-            <div class="carousel__slide">
-              <div class="card small-project">
-                <h4>{project.title}</h4>
-                <p>{project.description}</p>
-                <div class="small-project__links">
-                  <a class="btn btn-primary" href={project.links.demo} target="_blank" rel="noopener noreferrer">
-                    Demo
-                  </a>
-                  <a class="btn btn-secondary" href={project.links.src} target="_blank" rel="noopener noreferrer">
-                    Source
-                  </a>
-                </div>
+  <div class="carousel" id="small-projects-carousel">
+    <div class="carousel__track">
+      {
+        smallProjects.map(project => (
+          <div class="carousel__slide">
+            <div class="card small-project">
+              <h4>{project.title}</h4>
+              <p>{project.description}</p>
+              <div class="small-project__links">
+                <a class="btn btn-primary" href={project.links.demo} target="_blank" rel="noopener noreferrer">
+                  Demo
+                </a>
+                <a class="btn btn-secondary" href={project.links.src} target="_blank" rel="noopener noreferrer">
+                  Source
+                </a>
               </div>
             </div>
-          ))
-        }
-      </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
 
-      <div class="carousel__dots">
-        {smallProjects.map((_, i) => <button type="button" class="carousel__dot" data-index={i} aria-label={`Go to slide ${i + 1}`} />)}
-      </div>
+  <div class="container">
+    <div class="carousel__dots">
+      {smallProjects.map((_, i) => <button type="button" class="carousel__dot" data-index={i} aria-label={`Go to slide ${i + 1}`} />)}
     </div>
   </div>
 </div>
@@ -57,6 +59,15 @@ import smallProjects from '@/data/smallprojects.json';
     margin-bottom: 24px;
   }
 
+  .carousel {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+
   .carousel__track {
     display: flex;
     gap: 16px;
@@ -64,7 +75,8 @@ import smallProjects from '@/data/smallprojects.json';
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    padding-bottom: 8px;
+    scroll-padding-inline: 24px;
+    padding: 0 24px 8px;
     scrollbar-width: none;
   }
 

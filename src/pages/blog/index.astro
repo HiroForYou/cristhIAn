@@ -13,6 +13,10 @@ const allTags = Array.from(new Set(posts.flatMap(post => post.data.tags))).sort(
   a.localeCompare(b)
 );
 
+const VISIBLE_TAG_LIMIT = 8;
+const visibleTags = allTags.slice(0, VISIBLE_TAG_LIMIT);
+const overflowTags = allTags.slice(VISIBLE_TAG_LIMIT);
+
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'short',
@@ -31,11 +35,25 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
         <div class="blog-controls__tags" id="blog-tag-filter">
           <button type="button" class="tag is-active" data-tag="all">All</button>
           {
-            allTags.map(tag => (
+            visibleTags.map(tag => (
               <button type="button" class="tag" data-tag={slugify(tag)}>
                 {tag}
               </button>
             ))
+          }
+          {
+            overflowTags.map(tag => (
+              <button type="button" class="tag" data-tag={slugify(tag)} data-overflow-tag hidden>
+                {tag}
+              </button>
+            ))
+          }
+          {
+            overflowTags.length > 0 && (
+              <button type="button" class="tag blog-controls__more" id="blog-tags-more">
+                +{overflowTags.length} more
+              </button>
+            )
           }
         </div>
 
@@ -113,6 +131,10 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: #fff;
+  }
+
+  .blog-controls__more {
+    border-style: dashed;
   }
 
   .blog-controls__sort {
@@ -230,5 +252,17 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
       sortButtons.forEach(b => b.classList.toggle('is-active', b === button));
       applySort();
     });
+  });
+
+  const moreButton = document.getElementById('blog-tags-more');
+  const overflowTagButtons = Array.from(document.querySelectorAll('[data-overflow-tag]'));
+  const moreLabel = moreButton?.textContent?.trim() ?? '';
+
+  moreButton?.addEventListener('click', () => {
+    const expanding = overflowTagButtons.some(button => button.hidden);
+    overflowTagButtons.forEach(button => {
+      button.hidden = !expanding;
+    });
+    moreButton.textContent = expanding ? 'Show less' : moreLabel;
   });
 </script>
