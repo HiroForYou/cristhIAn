@@ -9,6 +9,10 @@ const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
+const allTags = Array.from(new Set(posts.flatMap(post => post.data.tags))).sort((a, b) =>
+  a.localeCompare(b)
+);
+
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'short',
@@ -23,10 +27,32 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
       <p class="eyebrow">Writing</p>
       <h1>Blog</h1>
 
-      <ul class="blog-index__list">
+      <div class="blog-controls">
+        <div class="blog-controls__tags" id="blog-tag-filter">
+          <button type="button" class="tag is-active" data-tag="all">All</button>
+          {
+            allTags.map(tag => (
+              <button type="button" class="tag" data-tag={slugify(tag)}>
+                {tag}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="blog-controls__sort" id="blog-sort">
+          <button type="button" class="btn btn-secondary is-active" data-sort="desc">
+            Newest first
+          </button>
+          <button type="button" class="btn btn-secondary" data-sort="asc">
+            Oldest first
+          </button>
+        </div>
+      </div>
+
+      <ul class="blog-index__list" id="blog-post-list">
         {
           posts.map(post => (
-            <li>
+            <li data-tags={post.data.tags.map(slugify).join(',')} data-date={post.data.date.toISOString()}>
               <div class="card blog-index__card">
                 <span class="blog-index__date">{dateFormatter.format(post.data.date)}</span>
                 <h2>
@@ -46,6 +72,10 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
           ))
         }
       </ul>
+
+      <p class="blog-index__empty" id="blog-empty" hidden>
+        No posts match this filter.
+      </p>
     </section>
   </main>
   <Footer />
@@ -56,9 +86,54 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     padding-top: 64px;
   }
 
+  .blog-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .blog-controls__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .blog-controls__tags .tag {
+    cursor: pointer;
+    border: 1px solid var(--color-tag-border);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .blog-controls__tags .tag.is-active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+
+  .blog-controls__sort {
+    display: flex;
+    gap: 8px;
+  }
+
+  .blog-controls__sort .btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+  }
+
+  .blog-controls__sort .btn.is-active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+
   .blog-index__list {
     list-style: none;
-    margin: 32px 0 0;
+    margin: 24px 0 0;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -102,4 +177,58 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     gap: 8px;
     flex-wrap: wrap;
   }
+
+  .blog-index__empty {
+    color: var(--color-text-muted);
+    margin-top: 24px;
+  }
 </style>
+
+<script>
+  const list = document.getElementById('blog-post-list');
+  const items = Array.from(list?.children ?? []);
+  const emptyMessage = document.getElementById('blog-empty');
+
+  const tagButtons = Array.from(document.querySelectorAll('#blog-tag-filter [data-tag]'));
+  const sortButtons = Array.from(document.querySelectorAll('#blog-sort [data-sort]'));
+
+  let activeTag = 'all';
+  let activeSort = 'desc';
+
+  function applyFilter() {
+    let visibleCount = 0;
+    items.forEach(item => {
+      const tags = (item.getAttribute('data-tags') ?? '').split(',');
+      const visible = activeTag === 'all' || tags.includes(activeTag);
+      item.hidden = !visible;
+      if (visible) visibleCount++;
+    });
+    if (emptyMessage) emptyMessage.hidden = visibleCount > 0;
+  }
+
+  function applySort() {
+    if (!list) return;
+    const sorted = [...items].sort((a, b) => {
+      const dateA = new Date(a.getAttribute('data-date') ?? 0).getTime();
+      const dateB = new Date(b.getAttribute('data-date') ?? 0).getTime();
+      return activeSort === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    sorted.forEach(item => list.appendChild(item));
+  }
+
+  tagButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      activeTag = button.getAttribute('data-tag') ?? 'all';
+      tagButtons.forEach(b => b.classList.toggle('is-active', b === button));
+      applyFilter();
+    });
+  });
+
+  sortButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      activeSort = button.getAttribute('data-sort') ?? 'desc';
+      sortButtons.forEach(b => b.classList.toggle('is-active', b === button));
+      applySort();
+    });
+  });
+</script>
