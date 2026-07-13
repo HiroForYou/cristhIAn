@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Mnist with Onnx",
+    "links": {
+      "codepen": "//vgzep.csb.app",
+      "github": "//github.com/HiroForYou/pytorch-to-javascript-with-onnx-js"
+    },
+    "description": "Running mnist digits classifier in the browser using ONNX.js"
+  }
+]

@@ -28,7 +28,8 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "prettier": "^3.4.2",
-    "prettier-plugin-astro": "^0.14.1"
+    "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.35.3"
   },
   "keywords": [
     "astro",

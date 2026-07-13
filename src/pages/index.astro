@@ -2,8 +2,11 @@
 import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Hero from '@/components/Hero.astro';
+import About from '@/components/About.astro';
 import Experience from '@/components/Experience.astro';
 import TechStack from '@/components/TechStack.astro';
+import Projects from '@/components/Projects.astro';
+import ConceptsSection from '@/components/ConceptsSection.astro';
 import Blog from '@/components/Blog.astro';
 import Contact from '@/components/Contact.astro';
 import Footer from '@/components/Footer.astro';
@@ -13,8 +16,11 @@ import Footer from '@/components/Footer.astro';
   <Navbar client:load />
   <main>
     <Hero />
+    <About />
     <Experience />
     <TechStack />
+    <Projects />
+    <ConceptsSection />
     <Blog />
     <Contact />
   </main>
