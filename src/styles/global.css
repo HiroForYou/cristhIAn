@@ -119,6 +119,7 @@ section {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   padding: 24px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
 }
 
 .btn {
