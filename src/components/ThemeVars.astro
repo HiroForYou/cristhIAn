@@ -2,9 +2,12 @@
 import { palettes } from '@/config/palettes.js';
 
 const cssBlocks = Object.entries(palettes)
-  .map(
-    ([name, p]) => `
-:root[data-theme="${name}"] {
+  .flatMap(([brand, modes]) =>
+    Object.entries(modes)
+      .filter(([key]) => key !== 'label')
+      .map(
+        ([mode, p]) => `
+:root[data-theme="${brand}"][data-mode="${mode}"] {
   --color-bg: ${p.bg};
   --color-surface: ${p.surface};
   --color-border: ${p.border};
@@ -19,6 +22,7 @@ const cssBlocks = Object.entries(palettes)
   --color-nav-bg: ${p.navBg};
   --gradient-primary: ${p.gradient};
 }`
+      )
   )
   .join('\n');
 ---

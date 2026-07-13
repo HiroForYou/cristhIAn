@@ -43,6 +43,25 @@
   color: var(--color-text);
 }
 
+.navbar__mode-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.navbar__mode-toggle:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .navbar__toggle {
   display: none;
   flex-direction: column;
@@ -100,5 +119,9 @@
     padding: 12px 0;
     color: var(--color-text-muted);
     font-weight: 600;
+  }
+
+  .navbar__links--mobile .navbar__mode-toggle {
+    margin-top: 8px;
   }
 }

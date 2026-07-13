@@ -2,7 +2,7 @@
 import '@/styles/global.css';
 import ThemeVars from '@/components/ThemeVars.astro';
 import ThemeToggle from '@/components/ThemeToggle.astro';
-import { defaultPalette } from '@/config/palettes.js';
+import { defaultPalette, defaultMode } from '@/config/palettes.js';
 
 interface Props {
   title?: string;
@@ -20,7 +20,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en" data-theme={defaultPalette}>
+<html lang="en" data-theme={defaultPalette} data-mode={defaultMode}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -41,6 +41,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:image" content={new URL(image, Astro.site)} />
 
     <ThemeVars />
+    <script is:inline>
+      const savedMode = localStorage.getItem('site-mode');
+      if (savedMode) document.documentElement.dataset.mode = savedMode;
+    </script>
     {import.meta.env.DEV && (
       <script is:inline>
         const saved = localStorage.getItem('dev-theme');
