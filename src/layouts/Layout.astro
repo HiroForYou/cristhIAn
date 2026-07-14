@@ -40,6 +40,33 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(image, Astro.site)} />
 
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Person',
+          '@id': 'https://www.cristhianwiki.com/#person',
+          name: 'Cristhian Wiki',
+          alternateName: 'Cristhian Sanchez',
+          jobTitle: 'Senior Machine Learning Engineer',
+          url: 'https://www.cristhianwiki.com',
+          image: new URL('/images/social-banner.jpg', Astro.site).toString(),
+          worksFor: { '@type': 'Organization', name: 'Seidor Analytics' },
+          sameAs: [
+            'https://github.com/HiroForYou',
+            'https://www.linkedin.com/in/cristhian-wiki/',
+          ],
+        },
+        {
+          '@type': 'WebSite',
+          '@id': 'https://www.cristhianwiki.com/#website',
+          name: 'Cristhian Wiki',
+          url: 'https://www.cristhianwiki.com',
+          author: { '@id': 'https://www.cristhianwiki.com/#person' },
+        },
+      ],
+    })} />
+
     <ThemeVars />
     <script is:inline>
       const savedMode = localStorage.getItem('site-mode');

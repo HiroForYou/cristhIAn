@@ -24,7 +24,7 @@ const shareLinks = {
   twitter: `https://twitter.com/share?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(postUrl)}`,
   reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(post.data.title)}`,
 };
-const githubEditUrl = `https://github.com/HiroForYou/cristhian/tree/develop/src/content/blog/${post.slug}/index.md`;
+const githubEditUrl = `https://github.com/HiroForYou/cristhIAn/tree/astro-migration/src/content/blog/${post.slug}/index.md`;
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -34,6 +34,17 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 ---
 
 <Layout title={`${post.data.title} — Cristhian Wiki`} description={post.data.excerpt}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.data.title,
+    description: post.data.excerpt,
+    datePublished: post.data.date.toISOString(),
+    author: { '@type': 'Person', name: post.data.author, url: 'https://www.cristhianwiki.com' },
+    url: postUrl,
+    keywords: post.data.tags.join(', '),
+  })} />
+
   <Navbar client:load />
   <main>
     <div class="container post-layout">

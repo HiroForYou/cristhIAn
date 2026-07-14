@@ -3,6 +3,7 @@ title: Building A Deep Learning Collection
 date: 2021-04-09 21:00:00
 author: Cristhian Wiki
 tags: ['python', 'pytorch', 'tensorflow']
+excerpt: 'A growing collection of PyTorch tutorials from basic to advanced, plus notes on PyTorch Lightning and Captum for training and interpreting deep learning models.'
 ---
 
 This repository contains various tutorials for the implementation of current DL
