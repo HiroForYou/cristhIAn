@@ -4,17 +4,20 @@ const swatches = ['var(--color-primary)', '#6a98f0', 'var(--gradient-primary)', 
 ---
 
 <div class="hero-card">
-  <pre class="hero-card__code"><span>1&nbsp;&nbsp;class <b>Person</b> {'{'}</span
-    ><span>2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; constructor() {'{'}</span
-    ><span
-      >3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.name = "<b>Cristhian Wiki</b>";</span
-    ><span
-      >4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.traits = ["<b>RESEARCH</b>", "<b
-        >DEV</b
-      >"];</span
-    ><span>5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.age = {age};</span
-    ><span>6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {'}'}</span><span>7&nbsp;&nbsp;{'}'}</span
-  ></pre>
+  <div class="hero-card__titlebar">
+    <span class="hero-card__dot hero-card__dot--red"></span>
+    <span class="hero-card__dot hero-card__dot--yellow"></span>
+    <span class="hero-card__dot hero-card__dot--green"></span>
+    <span class="hero-card__filename">person.js</span>
+  </div>
+  <pre class="hero-card__code"><span class="hc-line"><span class="hc-ln">1</span>  <span class="hc-kw">class</span> <span class="hc-id">Person</span> {'{'}</span
+><span class="hc-line"><span class="hc-ln">2</span>    <span class="hc-kw">constructor</span>() {'{'}</span
+><span class="hc-line"><span class="hc-ln">3</span>      <span class="hc-kw">this</span>.<span class="hc-id">name</span> = <span class="hc-str">"Cristhian Wiki"</span>;</span
+><span class="hc-line"><span class="hc-ln">4</span>      <span class="hc-kw">this</span>.<span class="hc-id">traits</span> = [<span class="hc-str">"RESEARCH"</span>, <span class="hc-str">"DEV"</span>];</span
+><span class="hc-line"><span class="hc-ln">5</span>      <span class="hc-kw">this</span>.<span class="hc-id">age</span> = <span class="hc-num">{age}</span>;</span
+><span class="hc-line"><span class="hc-ln">6</span>    {'}'}</span
+><span class="hc-line"><span class="hc-ln">7</span>  {'}'}</span
+></pre>
 
   <div class="hero-card__palette">
     {
@@ -45,20 +48,80 @@ const swatches = ['var(--color-primary)', '#6a98f0', 'var(--gradient-primary)', 
     }
   }
 
+  .hero-card__titlebar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+
+  .hero-card__dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+  }
+
+  .hero-card__dot--red {
+    background: #ff5f56;
+  }
+
+  .hero-card__dot--yellow {
+    background: #ffbd2e;
+  }
+
+  .hero-card__dot--green {
+    background: #27c93f;
+  }
+
+  .hero-card__filename {
+    margin-left: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
   .hero-card__code {
     margin: 0;
-    padding: 28px 32px;
-    border-radius: var(--radius-card);
+    padding: 24px 34px 30px;
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.95rem;
+    line-height: 1.9;
     color: var(--color-text);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
     white-space: pre;
-    min-width: 320px;
+    min-width: 360px;
+  }
+
+  .hc-line {
+    display: block;
+  }
+
+  .hc-ln {
+    display: inline-block;
+    width: 1.4em;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+  }
+
+  .hc-kw {
+    color: var(--color-primary-light);
+    font-weight: 600;
+  }
+
+  .hc-id {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .hc-str,
+  .hc-num {
+    color: var(--color-primary);
   }
 
   .hero-card__palette {
@@ -137,7 +200,7 @@ const swatches = ['var(--color-primary)', '#6a98f0', 'var(--gradient-primary)', 
 
     .hero-card__code {
       min-width: 0;
-      font-size: 0.72rem;
+      font-size: 0.82rem;
     }
 
     .hero-card__palette {

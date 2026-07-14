@@ -33,9 +33,7 @@ import smallProjects from '@/data/smallprojects.json';
   </div>
 
   <div class="container">
-    <div class="carousel__dots">
-      {smallProjects.map((_, i) => <button type="button" class="carousel__dot" data-index={i} aria-label={`Go to slide ${i + 1}`} />)}
-    </div>
+    <div class="carousel__dots" id="small-projects-dots"></div>
   </div>
 </div>
 
@@ -157,38 +155,56 @@ import smallProjects from '@/data/smallprojects.json';
 <script>
   const root = document.getElementById('small-projects-carousel');
   const track = root?.querySelector('.carousel__track');
+  const dotsContainer = document.getElementById('small-projects-dots');
   const slides = Array.from(track?.children ?? []);
-  const dots = Array.from(root?.querySelectorAll('.carousel__dot') ?? []);
 
-  let activeIndex = 0;
+  // One dot per *page* (a page = however many cards fit per the current
+  // breakpoint), not one per card — mirrors the CSS breakpoints exactly.
+  function getSlidesPerPage() {
+    if (window.matchMedia('(min-width: 1000px)').matches) return 3;
+    if (window.matchMedia('(min-width: 640px)').matches) return 2;
+    return 1;
+  }
+
+  let slidesPerPage = getSlidesPerPage();
+  let pageCount = Math.max(1, Math.ceil(slides.length / slidesPerPage));
+  let dots = [];
+  let activePage = 0;
   let autoplayTimer;
 
-  function goTo(index) {
-    const slide = slides[index];
+  function renderDots() {
+    if (!dotsContainer) return;
+    dotsContainer.innerHTML = '';
+    dots = Array.from({ length: pageCount }, (_, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'carousel__dot';
+      dot.setAttribute('aria-label', `Go to page ${i + 1}`);
+      dot.addEventListener('click', () => {
+        setActivePage(i);
+        goToPage(i);
+      });
+      dotsContainer.appendChild(dot);
+      return dot;
+    });
+  }
+
+  function goToPage(pageIndex) {
+    const slide = slides[Math.min(pageIndex * slidesPerPage, slides.length - 1)];
     if (!track || !slide) return;
     // Scroll the track's own scrollLeft directly (never scrollIntoView: it can
     // escape to the document/window and yank the whole page around vertically).
-    // Align to the slide's start (not centered) so exactly N full cards show,
-    // sliding the window by one card at a time like the original carousel.
-    const targetLeft = index === 0 ? 0 : slide.offsetLeft;
+    const targetLeft = pageIndex === 0 ? 0 : slide.offsetLeft;
     track.scrollTo({ left: targetLeft, behavior: 'smooth' });
   }
 
-  function setActive(index) {
-    activeIndex = index;
-    dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
+  function setActivePage(pageIndex) {
+    activePage = pageIndex;
+    dots.forEach((dot, i) => dot.classList.toggle('is-active', i === pageIndex));
   }
 
-  dots.forEach((dot, i) => {
-    dot.addEventListener('click', () => {
-      setActive(i);
-      goTo(i);
-    });
-  });
-
-  // With 2-3 slides visible at once, several intersect simultaneously — track
-  // the whole visible set and use the leftmost as "active" (matches which dot
-  // the current page/step corresponds to).
+  // With multiple slides visible at once, several intersect simultaneously —
+  // track the whole visible set and use the leftmost to derive the active page.
   const visibleIndexes = new Set();
   const observer = new IntersectionObserver(
     entries => {
@@ -198,7 +214,9 @@ import smallProjects from '@/data/smallprojects.json';
         if (entry.isIntersecting) visibleIndexes.add(index);
         else visibleIndexes.delete(index);
       });
-      if (visibleIndexes.size) setActive(Math.min(...visibleIndexes));
+      if (visibleIndexes.size) {
+        setActivePage(Math.floor(Math.min(...visibleIndexes) / slidesPerPage));
+      }
     },
     { root: track, threshold: 0.6 }
   );
@@ -206,8 +224,8 @@ import smallProjects from '@/data/smallprojects.json';
 
   function startAutoplay() {
     autoplayTimer = setInterval(() => {
-      const next = (activeIndex + 1) % slides.length;
-      goTo(next);
+      const next = (activePage + 1) % pageCount;
+      goToPage(next);
     }, 4000);
   }
 
@@ -215,12 +233,25 @@ import smallProjects from '@/data/smallprojects.json';
     clearInterval(autoplayTimer);
   }
 
-  if (slides.length > 1 && root) {
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const next = getSlidesPerPage();
+      if (next === slidesPerPage) return;
+      slidesPerPage = next;
+      pageCount = Math.max(1, Math.ceil(slides.length / slidesPerPage));
+      renderDots();
+      setActivePage(0);
+    }, 200);
+  });
+
+  renderDots();
+  if (pageCount > 1 && root) {
     startAutoplay();
     root.addEventListener('mouseenter', stopAutoplay);
     root.addEventListener('mouseleave', startAutoplay);
     root.addEventListener('touchstart', stopAutoplay, { passive: true });
   }
-
-  setActive(0);
+  setActivePage(0);
 </script>
