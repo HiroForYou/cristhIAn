@@ -55,3 +55,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           cname: www.cristhianwiki.com
+
+      - name: Ping IndexNow (Bing/Yandex instant indexing)
+        run: |
+          urls=$(grep -o '<loc>[^<]*</loc>' dist/sitemap-0.xml | sed 's/<loc>//;s#</loc>##' | python3 -c "import json,sys; print(json.dumps(sys.stdin.read().split()))")
+          curl -s -X POST https://api.indexnow.org/indexnow \
+            -H "Content-Type: application/json" \
+            -d "{\"host\":\"www.cristhianwiki.com\",\"key\":\"d8233fe13897a43eb598e5aef61599ee\",\"keyLocation\":\"https://www.cristhianwiki.com/d8233fe13897a43eb598e5aef61599ee.txt\",\"urlList\":$urls}"
