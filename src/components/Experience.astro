@@ -1,5 +1,9 @@
 ---
 import { experience } from '@/data/experience.js';
+
+const VISIBLE_COUNT = 4;
+const visibleEntries = experience.slice(0, VISIBLE_COUNT);
+const olderEntries = experience.slice(VISIBLE_COUNT);
 ---
 
 <section id="experience">
@@ -9,7 +13,7 @@ import { experience } from '@/data/experience.js';
 
     <ol class="timeline">
       {
-        experience.map(entry => (
+        visibleEntries.map(entry => (
           <li class="timeline__item">
             <span class="timeline__dot" />
             <div class="timeline__content card">
@@ -25,9 +29,50 @@ import { experience } from '@/data/experience.js';
           </li>
         ))
       }
+      {
+        olderEntries.map(entry => (
+          <li class="timeline__item timeline__item--older" hidden>
+            <span class="timeline__dot" />
+            <div class="timeline__content card">
+              <div class="timeline__head">
+                <h3>{entry.role}</h3>
+                <span class="timeline__date">{entry.dateRange}</span>
+              </div>
+              <p class="timeline__company">{entry.company}</p>
+              <ul>
+                {entry.bullets.map(bullet => <li>{bullet}</li>)}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
     </ol>
+
+    {
+      olderEntries.length > 0 && (
+        <button type="button" class="btn btn-secondary timeline__toggle" id="experience-toggle">
+          Show {olderEntries.length} earlier role{olderEntries.length === 1 ? '' : 's'}
+        </button>
+      )
+    }
   </div>
 </section>
+
+<script>
+  const toggle = document.getElementById('experience-toggle');
+  const olderItems = document.querySelectorAll('.timeline__item--older');
+
+  toggle?.addEventListener('click', () => {
+    const expanding = toggle.getAttribute('data-expanded') !== 'true';
+    olderItems.forEach(item => {
+      item.hidden = !expanding;
+    });
+    toggle.setAttribute('data-expanded', String(expanding));
+    toggle.textContent = expanding
+      ? 'Show less'
+      : `Show ${olderItems.length} earlier role${olderItems.length === 1 ? '' : 's'}`;
+  });
+</script>
 
 <style>
   .timeline {
@@ -96,5 +141,9 @@ import { experience } from '@/data/experience.js';
 
   .timeline__content li {
     margin-bottom: 6px;
+  }
+
+  .timeline__toggle {
+    margin-top: 8px;
   }
 </style>

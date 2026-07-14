@@ -18,7 +18,28 @@
         <span>TERMINAL</span>
         <span class="hero-card__terminal-rule"></span>
       </div>
-      <div class="hero-card__terminal-body" id="hero-card-terminal"></div>
+      <div class="hero-card__terminal-body" id="hero-card-terminal">
+        <div class="hc-line" id="hc-cmd-line">
+          <span class="hc-prompt">$ </span><span id="hc-cmd-text"></span><span class="hc-caret" id="hc-caret"></span>
+        </div>
+        <div class="hc-line" data-output="FastAPI APIs">
+          <span class="hc-check">  ✓  </span><span class="hc-output">FastAPI APIs</span>
+        </div>
+        <div class="hc-line" data-output="ML models trained">
+          <span class="hc-check">  ✓  </span><span class="hc-output">ML models trained</span>
+        </div>
+        <div class="hc-line" data-output="AWS deployment">
+          <span class="hc-check">  ✓  </span><span class="hc-output">AWS deployment</span>
+        </div>
+        <div class="hc-line" data-output="Production ready">
+          <span class="hc-check">  ✓  </span><span class="hc-output">Production ready</span>
+        </div>
+        <div class="hc-line hero-card__status">
+          <span class="hero-card__status-dot"></span>
+          <span class="hero-card__status-label">Status:</span>
+          <span class="hero-card__status-value">Shipping ML systems in production</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -28,14 +49,18 @@
     position: relative;
     flex-shrink: 0;
     width: 100%;
-    max-width: 520px;
+    max-width: 580px;
     perspective: 1400px;
   }
 
   .hero-card__frame {
     border-radius: var(--radius-card);
     overflow: hidden;
-    background: var(--color-surface);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface), white 8%),
+      var(--color-surface) 65%
+    );
     border: 1px solid var(--color-border);
     box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.5);
     animation: hero-card-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both,
@@ -108,62 +133,32 @@
 
   .hero-card__code {
     display: flex;
-    padding: 20px 22px 18px;
+    padding: 20px 18px 18px 20px;
     font-family: var(--font-mono);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     line-height: 1.85;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .hero-card__gutter {
+    flex: none;
     text-align: right;
     color: var(--color-text-muted);
     opacity: 0.5;
     user-select: none;
-    padding-right: 16px;
-    margin-right: 16px;
+    padding-right: 12px;
+    margin-right: 12px;
     border-right: 1px solid var(--color-border);
-    min-width: 18px;
-  }
-
-  .hero-card__gutter span {
-    display: block;
+    min-width: 14px;
   }
 
   .hero-card__lines {
     margin: 0;
     flex: 1;
+    min-width: 0;
     white-space: pre;
     overflow: hidden;
-  }
-
-  .hero-card__lines div {
-    min-height: 1.85em;
-    opacity: 0;
-    transform: translateY(4px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-
-  .hero-card__lines div.is-visible {
-    opacity: 1;
-    transform: none;
-  }
-
-  .hc-kw {
-    color: var(--color-primary-light);
-    font-weight: 600;
-  }
-
-  .hc-cls {
-    color: var(--color-text);
-    font-weight: 700;
-  }
-
-  .hc-mod {
-    color: var(--color-text-muted);
-  }
-
-  .hc-str {
-    color: var(--color-primary);
   }
 
   .hc-caret {
@@ -184,7 +179,7 @@
 
   .hero-card__terminal {
     border-top: 1px solid var(--color-border);
-    background: rgba(0, 0, 0, 0.15);
+    background: color-mix(in srgb, var(--color-surface), black 6%);
     padding: 13px 22px 16px;
     font-family: var(--font-mono);
     font-size: 0.8rem;
@@ -283,10 +278,23 @@
       align-self: center;
       max-width: 100%;
     }
+  }
 
+  @media (max-width: 560px) {
     .hero-card__code,
     .hero-card__terminal {
-      font-size: 0.78rem;
+      font-size: 0.66rem;
+    }
+
+    .hero-card__code {
+      padding-left: 14px;
+      padding-right: 10px;
+    }
+
+    .hero-card__gutter {
+      min-width: 12px;
+      padding-right: 8px;
+      margin-right: 8px;
     }
   }
 
@@ -294,6 +302,46 @@
     .hero-card__frame {
       animation: hero-card-in 0.4s ease both;
     }
+  }
+</style>
+
+<style is:global>
+  /* These target elements created at runtime via document.createElement
+     (the code gutter numbers + syntax-highlighted tokens), so they can't
+     carry Astro's scoped data-astro-cid attribute — scoping them like the
+     rest of this component's styles would silently never match. */
+  .hero-card__gutter span {
+    display: block;
+  }
+
+  .hero-card__lines div {
+    min-height: 1.85em;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .hero-card__lines div.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-card .hc-kw {
+    color: var(--color-primary-light);
+    font-weight: 600;
+  }
+
+  .hero-card .hc-cls {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .hero-card .hc-mod {
+    color: var(--color-text-muted);
+  }
+
+  .hero-card .hc-str {
+    color: var(--color-primary);
   }
 </style>
 
@@ -341,6 +389,15 @@
     const lineEls = Array.from(linesEl.children);
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+    // The terminal's rows all exist in the DOM from the start (hidden via
+    // opacity, not appended later) so revealing them never changes the
+    // card's height — only their own opacity/transform animates in.
+    const cmdLine = document.getElementById('hc-cmd-line');
+    const cmdText = document.getElementById('hc-cmd-text');
+    const caret = document.getElementById('hc-caret');
+    const outputRows = Array.from(terminal.querySelectorAll('[data-output]'));
+    const statusRow = terminal.querySelector('.hero-card__status');
+
     async function runSequence() {
       for (const line of lineEls) {
         line.classList.add('is-visible');
@@ -348,48 +405,22 @@
       }
       await sleep(450);
 
-      const cmdEl = document.createElement('div');
-      cmdEl.className = 'hc-line';
-      const prompt = document.createElement('span');
-      prompt.className = 'hc-prompt';
-      prompt.textContent = '$ ';
-      const cmdText = document.createElement('span');
-      const caret = document.createElement('span');
-      caret.className = 'hc-caret';
-      cmdEl.append(prompt, cmdText, caret);
-      terminal.appendChild(cmdEl);
-      cmdEl.classList.add('is-visible');
-
+      cmdLine?.classList.add('is-visible');
       const command = 'python profile.py';
       for (let i = 1; i <= command.length; i++) {
-        cmdText.textContent = command.slice(0, i);
+        if (cmdText) cmdText.textContent = command.slice(0, i);
         await sleep(45);
       }
-      caret.remove();
+      caret?.remove();
       await sleep(350);
 
-      const outputs = ['FastAPI APIs', 'ML models trained', 'AWS deployment', 'Production ready'];
-      for (const text of outputs) {
-        const row = document.createElement('div');
-        row.className = 'hc-line';
-        row.innerHTML = `<span class="hc-check">  ✓  </span><span class="hc-output">${text}</span>`;
-        terminal.appendChild(row);
-        // reflow before adding the visibility class so the transition plays
-        void row.offsetWidth;
+      for (const row of outputRows) {
         row.classList.add('is-visible');
         await sleep(280);
       }
 
       await sleep(250);
-      const status = document.createElement('div');
-      status.className = 'hc-line hero-card__status';
-      status.innerHTML =
-        '<span class="hero-card__status-dot"></span>' +
-        '<span class="hero-card__status-label">Status:</span>' +
-        '<span class="hero-card__status-value">Shipping ML systems in production</span>';
-      terminal.appendChild(status);
-      void status.offsetWidth;
-      status.classList.add('is-visible');
+      statusRow?.classList.add('is-visible');
     }
 
     runSequence();

@@ -9,6 +9,8 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
 ---
 
 <section class="hero" id="about">
+  <div class="hero__glow" aria-hidden="true"></div>
+  <div class="hero__grid" aria-hidden="true"></div>
   <div class="container hero__inner">
     <div class="hero__text">
       <p class="eyebrow hero__eyebrow">
@@ -98,7 +100,49 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
 
 <style>
   .hero {
+    position: relative;
+    overflow: hidden;
     padding-top: clamp(48px, 10vw, 96px);
+  }
+
+  .hero__glow {
+    position: absolute;
+    top: -10%;
+    right: -8%;
+    width: 620px;
+    height: 620px;
+    max-width: 60vw;
+    max-height: 60vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--color-primary), transparent 62%);
+    filter: blur(110px);
+    opacity: 0.16;
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  .hero__grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+        color-mix(in srgb, var(--color-text) 8%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-text) 8%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 45%);
+    mask-image: linear-gradient(to bottom, #000, transparent 45%);
+    opacity: 0.6;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  :root[data-mode='light'] .hero__glow {
+    opacity: 0.1;
+  }
+
+  :root[data-mode='light'] .hero__grid {
+    opacity: 0.4;
   }
 
   .hero__inner {

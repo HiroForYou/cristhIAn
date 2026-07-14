@@ -1,18 +1,18 @@
 export const techStack = [
   {
-    category: 'ML/AI',
-    items: ['PyTorch', 'PyTorch Lightning', 'TensorFlow', 'ONNX', 'MLflow', 'Captum'],
+    category: 'AI & Generative AI',
+    items: ['Deep Learning', 'LLMs', 'Agentic AI', 'RAG', 'CNNs', 'Time Series'],
   },
   {
-    category: 'Languages',
-    items: ['Python', 'JavaScript', 'Bash'],
+    category: 'Frameworks',
+    items: ['PyTorch', 'TensorFlow', 'Scikit-Learn', 'XGBoost'],
   },
   {
-    category: 'Tools',
-    items: ['Docker', 'Flask', 'FastAPI', 'Kubeflow'],
+    category: 'MLOps & Deployment',
+    items: ['FastAPI', 'Docker', 'CI/CD', 'MLflow', 'Kubeflow', 'Model Registry'],
   },
   {
-    category: 'Cloud',
-    items: ['AWS', 'CUDA'],
+    category: 'Data & Cloud',
+    items: ['Python', 'SQL', 'Snowflake', 'Spark', 'AWS', 'Azure', 'GCP'],
   },
 ];

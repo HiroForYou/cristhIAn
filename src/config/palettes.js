@@ -19,8 +19,11 @@ export const palettes = {
       gradient: 'linear-gradient(134deg, #6a98f0 0%, #4961dc 99%)',
     },
     light: {
-      bg: '#f8f8f8',
-      surface: '#f8f8f8',
+      // Original theme.js had bg === secondaryColor (both #F8F8F8), relying on
+      // the card's box-shadow alone to read as "raised" — that reads as
+      // invisible on real screens, so surface gets a touch of real contrast.
+      bg: '#f1f2f6',
+      surface: '#ffffff',
       border: '#c7d0ff',
       text: '#383838',
       textMuted: '#5f5f5f',
@@ -29,8 +32,8 @@ export const palettes = {
       primaryHover: '#4961dc',
       tagBg: 'rgba(109, 131, 242, 0.08)',
       tagBorder: 'rgba(109, 131, 242, 0.35)',
-      overlay: 'rgba(248, 248, 248, 0.9)',
-      navBg: 'rgba(248, 248, 248, 0.85)',
+      overlay: 'rgba(255, 255, 255, 0.9)',
+      navBg: 'rgba(255, 255, 255, 0.85)',
       gradient: 'linear-gradient(134deg, #6a98f0 0%, #4961dc 99%)',
     },
   },

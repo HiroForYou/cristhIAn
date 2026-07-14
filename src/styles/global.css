@@ -25,7 +25,10 @@ html {
   scroll-behavior: smooth;
   scrollbar-color: var(--color-primary) var(--color-bg);
   scrollbar-width: thin;
-  overflow-x: hidden;
+  /* clip (not hidden) avoids the classic gotcha where overflow-x:hidden on
+     html/body forces overflow-y to a computed 'auto', which breaks
+     position:sticky for every descendant (the navbar included). */
+  overflow-x: clip;
 }
 
 ::-webkit-scrollbar {
@@ -45,7 +48,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
