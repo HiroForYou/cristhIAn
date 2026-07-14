@@ -203,8 +203,11 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 
   /* Real phone screenshots (tall/portrait JPEGs) shouldn't stretch to the
      full article width like the wide diagrams do — cap them to a
-     realistic phone width and center them instead. */
-  .post__content :global(img[src*='origFormat%3Djpg']) {
+     realistic phone width and center them instead. Matched by the
+     "screen-" filename prefix (this post's own naming convention) rather
+     than the dev-only "?origFormat=jpg" query param, which never appears
+     in a production build's hashed /_astro/ output filenames. */
+  .post__content :global(img[src*='screen-']) {
     display: block;
     max-width: 320px;
     margin: 0 auto;
