@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" font-family="ui-monospace, 'JetBrains Mono', monospace">
+  <style>
+    .flow { stroke-dasharray: 6 6; animation: flow 1.2s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -24; } }
+    .dot { animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { r: 4; opacity: .5; } 50% { r: 6; opacity: 1; } }
+  </style>
+
+  <rect width="900" height="320" fill="#12141a"/>
+
+  <!-- App box -->
+  <rect x="24" y="120" width="160" height="80" rx="10" fill="#1c2030" stroke="#3a4160" stroke-width="1.5"/>
+  <text x="104" y="155" fill="#f2f4ff" font-size="15" font-weight="700" text-anchor="middle">MusicDown</text>
+  <text x="104" y="175" fill="#8a90b0" font-size="11" text-anchor="middle">Expo / Android</text>
+
+  <!-- Server box -->
+  <rect x="264" y="120" width="160" height="80" rx="10" fill="#1c2030" stroke="#3a4160" stroke-width="1.5"/>
+  <text x="344" y="150" fill="#f2f4ff" font-size="15" font-weight="700" text-anchor="middle">Express</text>
+  <text x="344" y="168" fill="#8a90b0" font-size="11" text-anchor="middle">/api/convert</text>
+  <text x="344" y="184" fill="#8a90b0" font-size="11" text-anchor="middle">x-api-key</text>
+
+  <!-- yt-dlp box -->
+  <rect x="504" y="40" width="150" height="70" rx="10" fill="#1c2030" stroke="#e5793f" stroke-width="1.5"/>
+  <text x="579" y="70" fill="#f2f4ff" font-size="15" font-weight="700" text-anchor="middle">yt-dlp</text>
+  <text x="579" y="88" fill="#8a90b0" font-size="11" text-anchor="middle">bestaudio</text>
+
+  <!-- ffmpeg box -->
+  <rect x="504" y="200" width="150" height="70" rx="10" fill="#1c2030" stroke="#5b8def" stroke-width="1.5"/>
+  <text x="579" y="230" fill="#f2f4ff" font-size="15" font-weight="700" text-anchor="middle">ffmpeg</text>
+  <text x="579" y="248" fill="#8a90b0" font-size="11" text-anchor="middle">-&gt; mp3 192k</text>
+
+  <!-- MP3 stream back to app -->
+  <rect x="720" y="120" width="156" height="80" rx="10" fill="#1c2030" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="798" y="155" fill="#f2f4ff" font-size="15" font-weight="700" text-anchor="middle">.mp3 stream</text>
+  <text x="798" y="175" fill="#8a90b0" font-size="11" text-anchor="middle">piped, no temp file</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#8a90b0"/>
+    </marker>
+  </defs>
+
+  <path class="flow" d="M184,160 H264" stroke="#8a90b0" stroke-width="2" marker-end="url(#arrow)"/>
+  <path class="flow" d="M424,150 C460,150 468,75 504,75" stroke="#e5793f" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path class="flow" d="M579,110 V200" stroke="#e5793f" stroke-width="2" marker-end="url(#arrow)"/>
+  <path class="flow" d="M654,235 C690,235 698,160 720,160" stroke="#3fb950" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <circle class="dot" cx="224" cy="160" r="4" fill="#f2f4ff"/>
+
+  <text x="450" y="288" fill="#565d80" font-size="12" text-anchor="middle">stdout of yt-dlp piped straight into ffmpeg's stdin, ffmpeg's stdout piped straight into the HTTP response</text>
+</svg>

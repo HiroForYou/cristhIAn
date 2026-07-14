@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="en" data-theme="original" data-mode="dark"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://www.cristhianwiki.com/blog/musicdown-android-mp3-downloader-expo/"><title>MusicDown: Building an Android MP3 Downloader with Expo — Cristhian Wiki</title><meta name="description" content="How I built MusicDown, an Expo/React Native app that turns a YouTube link into a tagged MP3 on your phone — plus the Android 14 permission bug that took the longest to figure out."><meta property="og:type" content="website"><meta property="og:url" content="https://www.cristhianwiki.com/blog/musicdown-android-mp3-downloader-expo/"><meta property="og:title" content="MusicDown: Building an Android MP3 Downloader with Expo — Cristhian Wiki"><meta property="og:description" content="How I built MusicDown, an Expo/React Native app that turns a YouTube link into a tagged MP3 on your phone — plus the Android 14 permission bug that took the longest to figure out."><meta property="og:image" content="https://www.cristhianwiki.com/images/social-banner.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="MusicDown: Building an Android MP3 Downloader with Expo — Cristhian Wiki"><meta name="twitter:description" content="How I built MusicDown, an Expo/React Native app that turns a YouTube link into a tagged MP3 on your phone — plus the Android 14 permission bug that took the longest to figure out."><meta name="twitter:image" content="https://www.cristhianwiki.com/images/social-banner.jpg"><style>
+:root[data-theme="original"][data-mode="dark"] {
+  --color-bg: #191919;
+  --color-surface: #232323;
+  --color-border: #303030;
+  --color-text: #f8f8f8;
+  --color-text-muted: #b3b3b3;
+  --color-primary: #6d83f2;
+  --color-primary-light: #6a98f0;
+  --color-primary-hover: #4961dc;
+  --color-tag-bg: rgba(109, 131, 242, 0.12);
+  --color-tag-border: rgba(109, 131, 242, 0.3);
+  --color-overlay: rgba(25, 25, 25, 0.92);
+  --color-nav-bg: rgba(25, 25, 25, 0.85);
+  --gradient-primary: linear-gradient(134deg, #6a98f0 0%, #4961dc 99%);
+}
+
+:root[data-theme="original"][data-mode="light"] {
+  --color-bg: #f1f2f6;
+  --color-surface: #ffffff;
+  --color-border: #c7d0ff;
+  --color-text: #383838;
+  --color-text-muted: #5f5f5f;
+  --color-primary: #6d83f2;
+  --color-primary-light: #4961dc;
+  --color-primary-hover: #4961dc;
+  --color-tag-bg: rgba(109, 131, 242, 0.08);
+  --color-tag-border: rgba(109, 131, 242, 0.35);
+  --color-overlay: rgba(255, 255, 255, 0.9);
+  --color-nav-bg: rgba(255, 255, 255, 0.85);
+  --gradient-primary: linear-gradient(134deg, #6a98f0 0%, #4961dc 99%);
+}
+
+:root[data-theme="pytorch"][data-mode="dark"] {
+  --color-bg: #000000;
+  --color-surface: #252525;
+  --color-border: rgba(158, 82, 159, 0.25);
+  --color-text: #ffffff;
+  --color-text-muted: #bbbbbb;
+  --color-primary: #ee4c2c;
+  --color-primary-light: #9e529f;
+  --color-primary-hover: #d8431f;
+  --color-tag-bg: rgba(158, 82, 159, 0.12);
+  --color-tag-border: rgba(158, 82, 159, 0.3);
+  --color-overlay: rgba(0, 0, 0, 0.92);
+  --color-nav-bg: rgba(0, 0, 0, 0.85);
+  --gradient-primary: linear-gradient(135deg, #ee4c2c, #9e529f);
+}
+
+:root[data-theme="pytorch"][data-mode="light"] {
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-border: rgba(37, 37, 37, 0.15);
+  --color-text: #252525;
+  --color-text-muted: #77787b;
+  --color-primary: #ee4c2c;
+  --color-primary-light: #9e529f;
+  --color-primary-hover: #d8431f;
+  --color-tag-bg: rgba(158, 82, 159, 0.08);
+  --color-tag-border: rgba(158, 82, 159, 0.3);
+  --color-overlay: rgba(255, 255, 255, 0.9);
+  --color-nav-bg: rgba(255, 255, 255, 0.85);
+  --gradient-primary: linear-gradient(135deg, #ee4c2c, #9e529f);
+}</style><script>
+      const savedMode = localStorage.getItem('site-mode');
+      if (savedMode) document.documentElement.dataset.mode = savedMode;
+    </script><link rel="stylesheet" href="/_astro/_slug_.DwpPIkXz.css">
+<style>.post-layout[data-astro-cid-4sn4zg3r]{padding-top:64px;max-width:1080px;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:48px;align-items:start}.post__back[data-astro-cid-4sn4zg3r]{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--color-text-muted);margin-bottom:20px}.post__back[data-astro-cid-4sn4zg3r]:hover{color:var(--color-primary)}.post__meta[data-astro-cid-4sn4zg3r]{font-family:var(--font-mono);font-size:.85rem;color:var(--color-text-muted);margin-bottom:8px}.post__content[data-astro-cid-4sn4zg3r]{line-height:1.75;margin-top:24px}.post__content[data-astro-cid-4sn4zg3r] h2{margin-top:2em}.post__content[data-astro-cid-4sn4zg3r] pre{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-card);padding:16px;overflow-x:auto}.post__content[data-astro-cid-4sn4zg3r] img{max-width:100%;height:auto;border-radius:var(--radius-card)}.post__content[data-astro-cid-4sn4zg3r] img[src*="origFormat%3Djpg"]{display:block;max-width:320px;margin:0 auto}.post__content[data-astro-cid-4sn4zg3r] a{color:var(--color-primary)}.post__comments[data-astro-cid-4sn4zg3r]{margin-top:48px;padding-top:32px;border-top:1px solid var(--color-border)}.post-sidebar[data-astro-cid-4sn4zg3r]{position:sticky;top:68px}.post-sidebar__section[data-astro-cid-4sn4zg3r]{margin-bottom:32px}.post-sidebar__section[data-astro-cid-4sn4zg3r] h2[data-astro-cid-4sn4zg3r]{font-size:1rem;margin-bottom:12px}.post-sidebar__tags[data-astro-cid-4sn4zg3r]{display:flex;flex-wrap:wrap;gap:8px}.post-sidebar__share[data-astro-cid-4sn4zg3r]{display:flex;gap:14px}.post-sidebar__share[data-astro-cid-4sn4zg3r] a[data-astro-cid-4sn4zg3r]{color:var(--color-primary)}.post-sidebar__github[data-astro-cid-4sn4zg3r]{display:inline-block;font-size:.9rem;padding-top:16px;border-top:1px solid var(--color-border)}.back-to-top[data-astro-cid-4sn4zg3r]{position:fixed;left:20px;bottom:20px;z-index:900;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--color-surface) 55%,transparent);backdrop-filter:blur(6px);border:1px solid var(--color-border);color:var(--color-text-muted);cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .25s ease,transform .25s ease,color .15s ease}.back-to-top[data-astro-cid-4sn4zg3r].is-visible{opacity:.45;pointer-events:auto;transform:translateY(0)}.back-to-top[data-astro-cid-4sn4zg3r]:hover{opacity:.9;color:var(--color-primary)}@media(max-width:860px){.post-layout[data-astro-cid-4sn4zg3r]{grid-template-columns:minmax(0,1fr);gap:32px}.post-sidebar[data-astro-cid-4sn4zg3r]{position:static;border-top:1px solid var(--color-border);padding-top:24px}}@media(max-width:600px){.post-layout[data-astro-cid-4sn4zg3r]{padding-top:32px}.post__content[data-astro-cid-4sn4zg3r] pre{padding:12px;font-size:.85rem}.post-sidebar__github[data-astro-cid-4sn4zg3r]{margin-bottom:80px}}
+</style></head> <body>  <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="23qUNl" prefix="r1" component-url="/_astro/Navbar.BvNYy2MG.js" component-export="default" renderer-url="/_astro/client.CimA0ymp.js" props="{&quot;data-astro-cid-4sn4zg3r&quot;:[0,true]}" ssr client="load" opts="{&quot;name&quot;:&quot;Navbar&quot;,&quot;value&quot;:true}" await-children><header class="navbar"><div class="navbar__inner container"><a href="/" class="navbar__brand" aria-label="Cristhian Wiki — home"><svg width="32" height="32" viewBox="0 0 4160 4160" aria-hidden="true"><g transform="translate(0,4160) scale(1,-1)"><path style="fill:var(--color-primary-hover)" d="M1635 3561 c87 -121 127 -264 107 -382 -19 -108 -54 -179 -189 -381 -161 -241 -178 -284 -177 -458 1 -105 5 -139 28 -213 27 -89 75 -193 118 -257 43 -63 42 -66 -3 -29 -64 52 -135 144 -174 224 -36 74 -51 131 -63 234 l-7 63 -53 -70 c-108 -143 -185 -308 -219 -472 -11 -54 -14 -110 -11 -205 4 -112 9 -143 37 -225 76 -226 235 -416 486 -582 114 -75 319 -176 455 -223 120 -41 116 -42 291 26 254 99 461 229 624 393 129 130 198 237 248 386 31 94 32 97 31 290 0 215 -15 310 -75 492 -155 468 -555 915 -1115 1248 -103 61 -353 190 -369 190 -3 0 11 -22 30 -49z"></path><path style="fill:var(--color-primary)" d="M1894 2563 c15 -50 28 -204 28 -328 0 -299 -76 -521 -209 -606 -106 -66 -253 -23 -407 120 l-48 46 7 -60 c41 -366 149 -637 345 -865 70 -80 199 -186 281 -230 33 -17 57 -35 54 -40 -3 -4 5 -6 17 -2 14 3 19 1 14 -6 -5 -8 -2 -10 8 -6 9 3 16 1 16 -5 0 -6 7 -8 15 -5 8 4 15 1 15 -7 0 -7 3 -9 7 -6 3 4 12 2 19 -4 15 -12 114 8 114 23 0 5 4 7 9 3 5 -3 12 -1 16 5 4 6 11 8 16 5 5 -4 9 -1 9 5 0 7 7 9 16 6 10 -4 13 -2 8 6 -5 8 -2 9 9 5 10 -4 17 -2 17 4 0 6 7 8 16 5 10 -4 13 -2 8 6 -5 8 -2 9 10 5 9 -4 15 -3 12 2 -4 5 18 23 47 39 79 45 215 161 273 233 168 209 232 392 221 634 -6 149 -31 247 -96 381 -154 314 -429 534 -791 634 -90 24 -82 24 -76 3z M1373 2345 c0 -44 2 -61 4 -37 2 23 2 59 0 80 -2 20 -4 1 -4 -43z M1210 1067 c0 -2 15 -16 33 -33 l32 -29 -29 33 c-28 30 -36 37 -36 29z M1280 997 c0 -2 15 -16 33 -33 l32 -29 -29 33 c-28 30 -36 37 -36 29z"></path><path style="fill:var(--color-primary-light)" d="M2353 1779 c48 -156 48 -342 0 -480 -68 -198 -198 -315 -362 -326 -83 -6 -169 15 -274 68 -74 37 -78 38 -71 17 50 -161 204 -362 349 -455 28 -18 55 -37 62 -43 16 -13 36 -13 51 2 7 7 12 9 12 5 0 -4 6 -3 13 3 6 6 38 26 69 44 214 126 349 338 373 587 13 128 -28 299 -105 433 -40 70 -127 178 -117 145z"></path></g></svg><span>cristhIAn</span></a><nav class="navbar__links navbar__links--desktop"><a href="/#about">About</a><a href="/#experience">Experience</a><a href="/#education">Education</a><a href="/#projects">Projects</a><a href="/blog">Blog</a><a href="/#contact">Contact</a><button type="button" class="navbar__mode-toggle" aria-label="Switch to light mode"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"></circle><path stroke-linecap="round" d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8l1.8-1.8M18 6l1.8-1.8"></path></svg></button></nav></div></header><div class="navbar__fab-wrapper"><button class="navbar__fab" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button></div><!--astro:end--></astro-island> <main data-astro-cid-4sn4zg3r> <div class="container post-layout" data-astro-cid-4sn4zg3r> <article class="post" data-astro-cid-4sn4zg3r> <a class="post__back" href="/blog" data-astro-cid-4sn4zg3r> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-astro-cid-4sn4zg3r> <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" data-astro-cid-4sn4zg3r></path> </svg>
+Back to blog
+</a> <p class="post__meta" data-astro-cid-4sn4zg3r> Jul 9, 2026 · 8 min read
+</p> <h1 data-astro-cid-4sn4zg3r>MusicDown: Building an Android MP3 Downloader with Expo</h1> <div class="post__content" data-astro-cid-4sn4zg3r> <p>I take the same commute most days, and it’s the same story every time: signal drops the second
+the bus goes underground, and whatever I was streaming stutters to a halt. I’ve been meaning to
+fix this properly for months — not with another app that “caches for offline” behind a
+subscription wall, but with something dumb-simple: paste a link, get a real MP3 file, own it. This
+week I finally sat down and built it. It’s called <strong>MusicDown</strong>, and it turned into a much better
+crash course on Android’s media permissions than I expected.</p>
+<p><em>Quick disclaimer before I get into it: this is a hobby project, built purely for my own private
+use — not a commercial product, and not an invitation to infringe anyone’s copyright. If you build
+something similar, respect the artists and the platforms’ terms of service.</em></p>
+<p>It’s two small projects talking to each other: an Expo/React Native app on the phone, and a tiny
+Node server that does the actual audio conversion. Here’s how it came together, screen by screen,
+bug by bug.</p>
+<h2 id="why-it-needs-a-server-at-all">Why it needs a server at all</h2>
+<p>My first instinct was “how hard can it be to do this on-device?” Turns out: hard enough that I
+gave up within the hour. Mobile apps can’t reliably shell out to <code>ffmpeg</code> or <code>yt-dlp</code>, so the
+conversion has to happen somewhere else. I kept the server deliberately boring — just Express,
+no YouTube library, no database:</p>
+<p><img alt="MusicDown architecture: the app calls the server, which pipes yt-dlp straight into ffmpeg straight into the HTTP response" loading="lazy" decoding="async" fetchpriority="auto" width="900" height="320" src="/_astro/architecture.EJE2puUZ_Z1getIX.svg" ></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="js"><code><span class="line"><span style="color:#6A737D">// server.js (simplified)</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> ytdlp</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> spawn</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">YTDLP_PATH</span><span style="color:#E1E4E8">, [</span><span style="color:#9ECBFF">'-f'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'bestaudio/best'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'--no-playlist'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'--newline'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'-o'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'-'</span><span style="color:#E1E4E8">, url]);</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> ffmpeg</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> spawn</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">FFMPEG_PATH</span><span style="color:#E1E4E8">, [</span><span style="color:#9ECBFF">'-i'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'pipe:0'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'-vn'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'-f'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'mp3'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'-b:a'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'192k'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'pipe:1'</span><span style="color:#E1E4E8">]);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">ytdlp.stdout.</span><span style="color:#B392F0">pipe</span><span style="color:#E1E4E8">(ffmpeg.stdin);</span></span>
+<span class="line"><span style="color:#E1E4E8">ffmpeg.stdout.</span><span style="color:#B392F0">pipe</span><span style="color:#E1E4E8">(res); </span><span style="color:#6A737D">// straight into the HTTP response, no temp files on disk</span></span></code></pre>
+<p>Nothing ever touches the server’s disk — <code>yt-dlp</code>’s stdout goes straight into <code>ffmpeg</code>’s stdin,
+and <code>ffmpeg</code>’s stdout goes straight into the HTTP response. The one wrinkle: since the response
+body <em>is</em> the binary MP3, it can’t also carry JSON progress updates. So I regex-match <code>yt-dlp</code>’s
+stderr for <code>[download]  NN.N%</code>, stash it in an in-memory map keyed by a <code>jobId</code> the app generates,
+and let the app poll a separate endpoint while the progress bar fills up.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Endpoint</th><th>What it does</th></tr></thead><tbody><tr><td><code>GET /api/health</code></td><td>used by the app’s “Probar conexión” button</td></tr><tr><td><code>GET /api/metadata?url=</code></td><td>runs <code>yt-dlp -j</code>, returns title/artist/thumbnail/duration</td></tr><tr><td><code>GET /api/progress?jobId=</code></td><td>polled during a conversion for the progress bar</td></tr><tr><td><code>GET /api/convert?url=&#x26;filename=&#x26;jobId=</code></td><td>streams back <code>audio/mpeg</code></td></tr></tbody></table>
+<p>Auth is a single <code>x-api-key</code> header, only enforced if I actually set an <code>API_KEY</code> env var (the
+server nags with a warning at boot if I forget). There’s a <code>Dockerfile</code> that pulls the latest
+<code>yt-dlp</code> binary straight off GitHub releases, but honestly I’m just running it on my own machine
+on the home network for now — the README I wrote for it is upfront that this is for personal use,
+not something to expose publicly, since re-hosting YouTube audio like this sits in a legal gray
+area and there’s zero rate limiting.</p>
+<h2 id="four-tabs-one-shared-button-component">Four tabs, one shared Button component</h2>
+<p>On the app side I used Expo SDK 54, <code>expo-router</code> for file-based navigation, and Nativewind
+(Tailwind v4, but for React Native) for styling instead of pulling in a full UI kit. I wrote one
+<code>Button</code> component with filled/outlined/text variants and reused it everywhere — partly
+discipline, partly not wanting to spend the weekend picking a design system.</p>
+<p>These are real screenshots off my phone, and it shows — this is a first working version. The
+plumbing all works end to end, but I haven’t touched the visual polish at all yet: default system
+fonts, no icons beyond the tab bar emoji, plain white backgrounds. That part’s next; for now I
+just wanted to get the whole loop working.</p>
+<h3 id="descargar">Descargar</h3>
+<p><img alt="The Descargar screen mid-download, showing the pasted YouTube link and a &quot;Descargando…&quot; progress button" loading="lazy" decoding="async" fetchpriority="auto" width="760" height="1600" src="/_astro/screen-download.1Px3cieq_2nxUJQ.webp" ></p>
+<p>The front door. Paste a link, tap the button, and it walks through fetching the metadata,
+streaming the conversion, and writing the tagged MP3 to <code>Music/</code> — the button’s own label doubles
+as the only progress indicator right now (<code>Descargando…</code>).</p>
+<h3 id="youtube">YouTube</h3>
+<p><img alt="The in-app YouTube browser, showing a video page with the custom &quot;Descargar este video&quot; button pinned below it" loading="lazy" decoding="async" fetchpriority="auto" width="763" height="1600" src="/_astro/screen-youtube.JGIjQocL_Z7wzPS.webp" ></p>
+<p>An in-app browser (<code>react-native-webview</code>) pointed at <code>m.youtube.com</code>, with an injected ad-block
+script I’m a little proud of — it hides banner elements, auto-clicks “skip ad” buttons, and for
+the unskippable ones just force-seeks the video to its own duration. The <strong>Descargar este video</strong>
+button at the bottom only lights up once the current page is actually a video URL, and reuses the
+exact same download flow as the Descargar tab.</p>
+<h3 id="música">Música</h3>
+<p><img alt="The Música tab in &quot;Mis descargas&quot; mode, listing downloaded tracks with a play button next to each" loading="lazy" decoding="async" fetchpriority="auto" width="758" height="1600" src="/_astro/screen-library.8_7U1OHC_2trktj.webp" ></p>
+<p>The library, with a toggle between <strong>Mis descargas</strong> (tracks downloaded through the app) and
+<strong>Todas (carpeta Music)</strong> (everything already sitting in the phone’s Music folder, which needs a
+real device build to read). Tapping a track you downloaded opens an <strong>edit screen</strong> — no
+screenshot of that one yet — where you can rewrite the ID3 title/artist/album and swap the cover
+art, either from your gallery or by searching the iTunes Search API right there in the app.</p>
+<h3 id="ajustes">Ajustes</h3>
+<p><img alt="The Ajustes screen with the conversion server URL filled in and a &quot;Probando…&quot; connection test in progress" loading="lazy" decoding="async" fetchpriority="auto" width="760" height="1600" src="/_astro/screen-settings.Rc3yudIO_ZI5Mq9.webp" ></p>
+<p>Just the server URL, the API key, a connection test button (mid-test in that screenshot — mine’s
+pointed at my own machine’s LAN IP), and — because I will absolutely need this one day — a “delete
+everything” button with a confirmation dialog.</p>
+<h2 id="the-part-that-actually-ate-my-saturday">The part that actually ate my Saturday</h2>
+<p>Everything above came together faster than I expected. What didn’t was Android’s storage
+permission model, which has changed enough across 11, 13, and 14 that half the blog posts I found
+while debugging were already out of date.</p>
+<h3 id="the-android-14-permission-wall">The Android 14 permission wall</h3>
+<p>The one that cost me the most time: on Android 14, <strong>every write and delete to my own downloaded
+files was silently failing</strong>, with no error I could find anywhere. It took a long afternoon with
+the <code>expo-media-library</code> source open in one tab and the Android permission docs in another to
+figure out why.</p>
+<p><img alt="The Android 14 permission bug: an audio-only app requests a permission it can never be granted, so every media write silently fails" loading="lazy" decoding="async" fetchpriority="auto" width="900" height="300" src="/_astro/permission-bug.BMkahAiw_25ce9l.svg" ></p>
+<p>The library’s permission logic was unconditionally requesting <code>READ_MEDIA_VISUAL_USER_SELECTED</code> —
+a permission that can <em>only</em> ever be granted through the photo/video partial-access picker. An
+audio-only app never shows that picker, so the permission can never be granted, and every write or
+delete call just fails, forever, on Android 14+. I ended up patching the library’s own Kotlin
+permission code (applied automatically via pnpm’s <code>patchedDependencies</code>, so I don’t have to
+remember to reapply it) so it only asks for that permission when the app actually declares
+photo/video access — which mine never does.</p>
+<p>A few smaller ones came out of the same rabbit hole.</p>
+<h3 id="no-album-folders">No album folders</h3>
+<p><code>createAlbumAsync</code> does raw filesystem I/O that needs a <code>WRITE_EXTERNAL_STORAGE</code> grant Android
+13+ won’t hand out anymore. <code>createAssetAsync</code> alone uses the modern MediaStore insert path and
+drops the file straight into <code>Music/</code> without touching that wall, so I just stopped trying to
+group things into albums.</p>
+<h3 id="write-only-on-purpose">Write-only, on purpose</h3>
+<p>The app only ever creates new assets, never reads the existing library through this permission, so
+it requests write-only access explicitly — which also sidesteps the granular “audio” read
+permission that Expo Go doesn’t even declare in its manifest.</p>
+<h3 id="deleting-needs-the-newer-api">Deleting needs the newer API</h3>
+<p>The legacy <code>deleteAssetsAsync()</code> doesn’t implement Android 11’s required user-consent flow — it
+can silently no-op instead of deleting anything. <code>expo-media-library/next</code>’s <code>Asset.delete()</code>
+properly triggers the real system confirmation dialog.</p>
+<h3 id="why-i-need-a-real-dev-build-not-expo-go">Why I need a real dev build, not Expo Go</h3>
+<p>Reading the whole Music folder needs <code>READ_MEDIA_AUDIO</code>, which Expo Go’s fixed manifest can’t
+carry — only a custom development client, built with EAS, actually ships the native permissions my
+config plugins add. That’s why both my dev and preview EAS profiles build a plain APK for
+sideloading, rather than the Play-Store AAB format.</p>
+<h3 id="a-broken-enum">A broken enum</h3>
+<p><code>browser-id3-writer</code> declares its <code>ImageType</code> as a TypeScript <code>const enum</code>, which gets erased at
+compile time — but the published package ships plain JS with no runtime export for it, so
+<code>ImageType.CoverFront</code> is quietly <code>undefined</code>. I just hardcoded the raw APIC picture-type byte
+(<code>0x03</code>) instead, wrapped in a try/catch so one bad YouTube thumbnail can’t take down an entire
+download.</p>
+<h2 id="where-its-at">Where it’s at</h2>
+<p>No background downloads or notifications yet — everything runs while the Download or YouTube tab
+is actually open, which is the obvious next thing to build. But as of this weekend I’ve got a
+working pipeline from “paste a link” to “tagged MP3, real cover art, sitting in my Music app,” and
+a much sharper mental model of exactly where Android’s permission system decides to bite you.</p> </div> <div id="disqus_thread" class="post__comments" data-astro-cid-4sn4zg3r></div> </article> <aside class="post-sidebar" data-astro-cid-4sn4zg3r> <section class="post-sidebar__section" data-astro-cid-4sn4zg3r> <h2 data-astro-cid-4sn4zg3r>Tags</h2> <div class="post-sidebar__tags" data-astro-cid-4sn4zg3r> <a class="tag" href="/blog?tag=expo" data-astro-cid-4sn4zg3r> expo </a><a class="tag" href="/blog?tag=react-native" data-astro-cid-4sn4zg3r> react-native </a><a class="tag" href="/blog?tag=android" data-astro-cid-4sn4zg3r> android </a><a class="tag" href="/blog?tag=nodejs" data-astro-cid-4sn4zg3r> nodejs </a> </div> </section> <section class="post-sidebar__section" data-astro-cid-4sn4zg3r> <h2 data-astro-cid-4sn4zg3r>Share on</h2> <div class="post-sidebar__share" data-astro-cid-4sn4zg3r> <a href="https://facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.cristhianwiki.com%2Fblog%2Fmusicdown-android-mp3-downloader-expo%2F" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" data-astro-cid-4sn4zg3r> <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-4sn4zg3r> <path d="M13.5 21v-7.5H16l.5-3h-3V8.2c0-.87.24-1.46 1.5-1.46H16.6V4.14C16.3 4.1 15.3 4 14.1 4c-2.4 0-4 1.47-4 4.16V10.5H7.6v3H10V21h3.5Z" data-astro-cid-4sn4zg3r></path> </svg> </a> <a href="https://twitter.com/share?text=MusicDown%3A%20Building%20an%20Android%20MP3%20Downloader%20with%20Expo&url=https%3A%2F%2Fwww.cristhianwiki.com%2Fblog%2Fmusicdown-android-mp3-downloader-expo%2F" target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter" data-astro-cid-4sn4zg3r> <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-4sn4zg3r> <path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.7 11.7 0 0 1 3.4 4.6a4.1 4.1 0 0 0 1.3 5.5c-.6 0-1.2-.2-1.8-.5v.1c0 2 1.4 3.6 3.3 4a4.2 4.2 0 0 1-1.9.1 4.1 4.1 0 0 0 3.9 2.9A8.3 8.3 0 0 1 2 18.6a11.7 11.7 0 0 0 6.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1Z" data-astro-cid-4sn4zg3r></path> </svg> </a> <a href="https://www.reddit.com/submit?url=https%3A%2F%2Fwww.cristhianwiki.com%2Fblog%2Fmusicdown-android-mp3-downloader-expo%2F&title=MusicDown%3A%20Building%20an%20Android%20MP3%20Downloader%20with%20Expo" target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit" data-astro-cid-4sn4zg3r> <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-4sn4zg3r> <path d="M22 12.3a2.2 2.2 0 0 0-3.7-1.6 10.7 10.7 0 0 0-5.6-1.7l1-4.5 3.2.7a1.5 1.5 0 1 0 .2-.9l-3.6-.8a.5.5 0 0 0-.6.4l-1.1 5a10.7 10.7 0 0 0-5.7 1.7A2.2 2.2 0 0 0 2 12.3c0 .8.4 1.5 1 1.9v.4c0 3 3.5 5.4 7.9 5.4s7.9-2.4 7.9-5.4v-.4c.6-.4 1.2-1.1 1.2-1.9ZM8 13.6a1.2 1.2 0 1 1 2.4 0 1.2 1.2 0 0 1-2.4 0Zm7.6 3a5.9 5.9 0 0 1-3.6 1c-1.3 0-2.6-.3-3.6-1a.4.4 0 0 1 .5-.6c.9.6 2 .9 3.1.9s2.2-.3 3.1-.9a.4.4 0 0 1 .5.6Zm-.3-1.8a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z" data-astro-cid-4sn4zg3r></path> </svg> </a> </div> </section> <a class="post-sidebar__github" href="https://github.com/HiroForYou/cristhian/tree/develop/src/content/blog/musicdown-android-mp3-downloader-expo/index.md" target="_blank" rel="noopener noreferrer" data-astro-cid-4sn4zg3r>
+Edit post on GitHub
+</a> </aside> </div> </main> <button id="back-to-top" class="back-to-top" aria-label="Back to top" type="button" data-astro-cid-4sn4zg3r> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-astro-cid-4sn4zg3r> <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" data-astro-cid-4sn4zg3r></path> </svg> </button> <footer class="footer" data-astro-cid-sz7xmlte> <div class="container footer__inner" data-astro-cid-sz7xmlte> <span data-astro-cid-sz7xmlte>© 2026 Cristhian Wiki</span> <a href="https://github.com/HiroForYou" target="_blank" rel="noopener noreferrer" data-astro-cid-sz7xmlte>
+Made with ❤
+</a> </div> </footer>    </body></html> <script type="module">const o=document.getElementById("back-to-top"),e=()=>{const t=document.documentElement.scrollHeight-(window.scrollY+window.innerHeight);o?.classList.toggle("is-visible",t<600)};e();window.addEventListener("scroll",e,{passive:!0});window.addEventListener("resize",e);o?.addEventListener("click",()=>{window.scrollTo({top:0,behavior:"smooth"})});</script> <script>(function(){const shortname = "https-hiroforyou-github-io-cristhian";
+const identifier = "musicdown-android-mp3-downloader-expo";
+const url = "https://www.cristhianwiki.com/blog/musicdown-android-mp3-downloader-expo/";
+const title = "MusicDown: Building an Android MP3 Downloader with Expo";
+
+  window.disqus_config = function () {
+    this.page.url = url;
+    this.page.identifier = identifier;
+    this.page.title = title;
+  };
+  (function () {
+    const script = document.createElement('script');
+    script.src = `https://${shortname}.disqus.com/embed.js`;
+    script.setAttribute('data-timestamp', String(+new Date()));
+    (document.head || document.body).appendChild(script);
+  })();
+})();</script> 
