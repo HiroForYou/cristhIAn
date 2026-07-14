@@ -18,6 +18,10 @@ One of the most important components of this pipeline is the collection of data.
 As far as possible, I will try to provide a dataset to train the model, in such
 a way that the experiments are easily reproducible by you.
 
+A clear project structure matters just as much as the pipeline itself:
+
+![HiroForYou/Deep-Learning-Collection on GitHub](./images/repo-preview.png)
+
 **I also try to integrate other tools that are very useful**
 
 - Pytorch Lightning
@@ -118,15 +122,11 @@ _ = viz.visualize_image_attr(
             outlier_perc=1)
 ```
 
-<p align="center">
-  <img src="https://cms.gilberttanner.com/content/images/size/w2000/2020/08/GradientSHAP-Example.png" />
-</p>
-
 Now you have powerful tools to enhance your DL projects.
 
 ## About the tutorials
 
-[![](https://github-readme-stats.vercel.app/api/pin/?username=HiroForYou&repo=Deep-Learning-Collection&show_owner=true)](https://github.com/HiroForYou/Deep-Learning-Collection)
+[HiroForYou/Deep-Learning-Collection on GitHub](https://github.com/HiroForYou/Deep-Learning-Collection)
 
 The code presented in the repository is part of my personal collection that has
 been compiled from various YouTube channels, associated repositories, etc. I try

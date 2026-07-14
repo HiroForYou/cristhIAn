@@ -12,9 +12,14 @@ const { fullBleed = false } = Astro.props;
     position: absolute;
     left: 0;
     right: 0;
+    /* top+bottom (not a percentage/fixed height) so the panel always
+       tracks the section's actual content height — a fixed min-height
+       is too short once content grows taller (e.g. quote cards
+       stacking to a single column on mobile), letting the last card
+       spill past the panel's bottom edge onto the plain background. */
     top: 40px;
-    height: 90%;
-    min-height: 320px;
+    bottom: 0;
+    height: auto;
     background: var(--color-surface);
     transform: skewY(-3deg);
     z-index: -1;
@@ -26,7 +31,13 @@ const { fullBleed = false } = Astro.props;
     left: 50%;
     right: auto;
     margin-left: -50vw;
+    /* top+bottom (not height:100%) so it fills the section correctly even
+       when the section's own height is content-driven (auto) rather than
+       an explicit value — a percentage height would resolve to auto (0px)
+       in that case. */
     top: 0;
-    height: 100%;
+    bottom: 0;
+    height: auto;
+    min-height: 0;
   }
 </style>

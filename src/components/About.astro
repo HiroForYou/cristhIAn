@@ -35,7 +35,13 @@ const quotes = [
         (using MLOps tools).
         <br /><br />
         My goal as a human being is to be able to change the world and make
-        it a better place (using deep learning and lots of creativity).
+        it a better place (using deep learning and lots of creativity). I
+        love a good challenge, and I'm planning to pursue a Master's or PhD
+        next, focused on deep learning and neuroscience.
+        <br /><br />
+        Outside of work, you'll find me riding motorcycles, tinkering with
+        cars, traveling whenever I can, and at the gym — but especially
+        hanging out with my cats, who are pretty much my whole world.
       </p>
     </div>
 
@@ -102,5 +108,20 @@ const quotes = [
     font-family: var(--font-mono);
     font-size: 0.85rem;
     font-style: normal;
+  }
+
+  @media (max-width: 700px) {
+    .about__intro {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    /* auto-fit lands on 2 columns around this width, which strands an
+       odd-numbered 3rd card alone in its own row with empty space next
+       to it — force a single column instead of relying on auto-fit. */
+    .about__quotes {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

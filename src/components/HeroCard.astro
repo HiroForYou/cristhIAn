@@ -421,6 +421,10 @@
 
       await sleep(250);
       statusRow?.classList.add('is-visible');
+
+      // Lets Hero.astro's "PyTorch lover" typewriter phrase wait its turn
+      // instead of racing this terminal sequence.
+      window.dispatchEvent(new Event('hero-terminal-done'));
     }
 
     runSequence();

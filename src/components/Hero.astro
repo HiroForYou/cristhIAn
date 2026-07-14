@@ -19,14 +19,15 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
       </p>
       <h1>Cristhian Wiki</h1>
       <p class="hero__subtitle">
-        <span id="hero-typewriter" data-phrases={JSON.stringify(PHRASES)}></span><span
+        <span id="hero-typewriter" data-phrases={JSON.stringify(PHRASES)}>{PHRASES[0]}</span><span
+          id="hero-cursor"
           class="hero__cursor"
           aria-hidden="true">|</span
         >
       </p>
       <p class="hero__bio">
-        PyTorch-loving ML engineer from Peru, focused on designing and shipping
-        novel deep learning architectures — from research to production.
+        Self-taught ML engineer from Peru, shipping deep learning systems from
+        research to production — next up, grad school in deep learning and neuroscience.
       </p>
 
       <div class="hero__cta">
@@ -65,6 +66,7 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
 
 <script>
   const el = document.getElementById('hero-typewriter');
+  const cursor = document.getElementById('hero-cursor');
   const phrases = JSON.parse(el?.getAttribute('data-phrases') ?? '[]');
 
   let phraseIndex = 0;
@@ -95,7 +97,23 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
     setTimeout(tick, deleting ? 35 : 65);
   }
 
-  if (phrases.length) tick();
+  // Until HeroCard's terminal sequence finishes, the first phrase just
+  // sits there as static server-rendered text — no cursor, no blinking,
+  // no typing — so the two animations don't run at once. Once it fires,
+  // the cursor turns on and the cycle continues from "already typed"
+  // straight into deleting, at the same pace tick() uses elsewhere.
+  if (phrases.length) {
+    window.addEventListener(
+      'hero-terminal-done',
+      () => {
+        cursor?.classList.add('is-active');
+        charIndex = phrases[0].length;
+        deleting = true;
+        setTimeout(tick, 3200);
+      },
+      { once: true }
+    );
+  }
 </script>
 
 <style>
@@ -142,7 +160,15 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
   }
 
   :root[data-mode='light'] .hero__grid {
-    opacity: 0.4;
+    /* Dark-on-light lines at the same low alpha as the dark theme read as
+       nearly invisible in practice, so light mode gets stronger lines
+       instead of just a lower layer opacity. */
+    background-image: linear-gradient(
+        color-mix(in srgb, var(--color-text) 18%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-text) 18%, transparent) 1px, transparent 1px);
+    opacity: 0.9;
   }
 
   .hero__inner {
@@ -171,6 +197,13 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
   }
 
   .hero__cursor {
+    opacity: 0;
+  }
+
+  /* Stays hidden (and the phrase above stays static) until HeroCard's
+     terminal sequence finishes and the JS below activates it. */
+  .hero__cursor.is-active {
+    opacity: 1;
     animation: hero-blink 1s step-end infinite;
   }
 

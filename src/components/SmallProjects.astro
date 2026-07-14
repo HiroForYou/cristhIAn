@@ -6,6 +6,7 @@ import smallProjects from '@/data/smallprojects.json';
   <div class="small-projects__skew" aria-hidden="true"></div>
 
   <div class="container">
+    <p class="eyebrow">More to explore</p>
     <h3 class="small-projects__title">Small Projects</h3>
   </div>
 
@@ -40,8 +41,12 @@ import smallProjects from '@/data/smallprojects.json';
 <style>
   .small-projects {
     position: relative;
-    margin-top: 64px;
-    padding-block: 64px;
+    margin-top: 56px;
+    /* More room above (between the title and the carousel itself) but the
+       bottom stays modest — that side already stacks with Projects' and
+       Contact's own section padding on the way to the next section. */
+    padding-top: 64px;
+    padding-bottom: 24px;
   }
 
   .small-projects__skew {
@@ -52,7 +57,7 @@ import smallProjects from '@/data/smallprojects.json';
     width: 100vw;
     margin-left: -50vw;
     background: var(--color-surface);
-    transform: skewY(-3deg);
+    transform: skewY(-2deg);
     z-index: -1;
   }
 
@@ -118,23 +123,7 @@ import smallProjects from '@/data/smallprojects.json';
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-top: 20px;
-  }
-
-  .carousel__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    border: none;
-    background: var(--color-border);
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.2s ease, transform 0.2s ease;
-  }
-
-  .carousel__dot.is-active {
-    background: var(--color-primary);
-    transform: scale(1.3);
+    margin-top: 32px;
   }
 
   @media (min-width: 640px) {
@@ -149,6 +138,27 @@ import smallProjects from '@/data/smallprojects.json';
       /* exactly 3 per page — no partial 4th peeking in */
       flex-basis: calc((100% - 32px) / 3);
     }
+  }
+</style>
+
+<style is:global>
+  /* The dots are created at runtime via document.createElement, so they never
+     receive Astro's scoped data-astro-cid attribute — scoping these rules
+     like the rest of this component's styles would silently never match. */
+  .carousel__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-border);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .carousel__dot.is-active {
+    background: var(--color-primary);
+    transform: scale(1.3);
   }
 </style>
 
@@ -223,10 +233,11 @@ import smallProjects from '@/data/smallprojects.json';
   slides.forEach(slide => observer.observe(slide));
 
   function startAutoplay() {
+    // Slow enough to actually read a card's description before it advances.
     autoplayTimer = setInterval(() => {
       const next = (activePage + 1) % pageCount;
       goToPage(next);
-    }, 4000);
+    }, 7000);
   }
 
   function stopAutoplay() {

@@ -101,6 +101,14 @@ kbd {
   .container {
     width: 92%;
   }
+
+  /* The clamp()'s 64px floor doesn't scale down for narrow viewports, so
+     two adjacent sections' padding stack into a ~130px dead band on
+     mobile — tighten the floor there so section transitions don't read
+     as an oversized empty gap. */
+  :root {
+    --section-spacing: clamp(40px, 10vw, 120px);
+  }
 }
 
 section {

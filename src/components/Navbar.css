@@ -62,40 +62,7 @@
   border-color: var(--color-primary);
 }
 
-.navbar__toggle {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 36px;
-  height: 36px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-}
-
-.navbar__toggle span {
-  width: 20px;
-  height: 2px;
-  background: var(--color-text);
-  border-radius: 2px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.navbar__toggle.is-open span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.navbar__toggle.is-open span:nth-child(2) {
-  opacity: 0;
-}
-
-.navbar__toggle.is-open span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
-
-.navbar__links--mobile {
+.navbar__fab-wrapper {
   display: none;
 }
 
@@ -104,24 +71,79 @@
     display: none;
   }
 
-  .navbar__toggle {
-    display: flex;
-  }
-
-  .navbar__links--mobile {
+  /* Restores the original site's fixed circular mobile nav trigger
+     (bottom-right FAB that pops a menu above it) instead of an in-bar
+     hamburger dropdown. */
+  .navbar__fab-wrapper {
     display: flex;
     flex-direction: column;
-    padding: 16px 24px 24px;
-    border-top: 1px solid var(--color-border);
+    align-items: flex-end;
+    gap: 12px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
   }
 
-  .navbar__links--mobile a {
-    padding: 12px 0;
-    color: var(--color-text-muted);
+  .navbar__fab {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .navbar__fab span {
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .navbar__fab.is-open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .navbar__fab.is-open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar__fab.is-open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .navbar__fab-links {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    min-width: 160px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 12px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  }
+
+  .navbar__fab-links a {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    color: var(--color-text);
     font-weight: 600;
+    text-align: center;
   }
 
-  .navbar__links--mobile .navbar__mode-toggle {
-    margin-top: 8px;
+  .navbar__fab-links .navbar__mode-toggle {
+    align-self: center;
+    margin-top: 4px;
   }
 }

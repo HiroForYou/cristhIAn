@@ -17,15 +17,6 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 
-const allPosts = await getCollection('blog');
-const tagCounts = new Map();
-allPosts.forEach(p => {
-  p.data.tags.forEach(tag => {
-    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-  });
-});
-const allTags = Array.from(tagCounts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-
 const minutes = readingTime(post.body);
 const postUrl = new URL(Astro.url.pathname, Astro.site).toString();
 const shareLinks = {
@@ -47,6 +38,12 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   <main>
     <div class="container post-layout">
       <article class="post">
+        <a class="post__back" href="/blog">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+          </svg>
+          Back to blog
+        </a>
         <p class="post__meta">
           {dateFormatter.format(post.data.date)} · {minutes} min read
         </p>
@@ -64,9 +61,9 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
           <h2>Tags</h2>
           <div class="post-sidebar__tags">
             {
-              allTags.map(([tag, count]) => (
-                <a class="tag" href={`/blog/tags/${slugify(tag)}/`}>
-                  {tag}, {count}
+              post.data.tags.map(tag => (
+                <a class="tag" href={`/blog?tag=${slugify(tag)}`}>
+                  {tag}
                 </a>
               ))
             }
@@ -100,8 +97,36 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
       </aside>
     </div>
   </main>
+
+  <button id="back-to-top" class="back-to-top" aria-label="Back to top" type="button">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" />
+    </svg>
+  </button>
+
   <Footer />
 </Layout>
+
+<script>
+  const backToTop = document.getElementById('back-to-top');
+
+  const toggleVisibility = () => {
+    // Show only once the reader is nearing the bottom of the post, not
+    // after any small scroll — this is for "I'm done, take me up", not
+    // a general-purpose scroll aid.
+    const distanceFromBottom =
+      document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+    backToTop?.classList.toggle('is-visible', distanceFromBottom < 600);
+  };
+
+  toggleVisibility();
+  window.addEventListener('scroll', toggleVisibility, { passive: true });
+  window.addEventListener('resize', toggleVisibility);
+
+  backToTop?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
 
 <script define:vars={{
   shortname: 'https-hiroforyou-github-io-cristhian',
@@ -132,6 +157,20 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     align-items: start;
   }
 
+  .post__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 20px;
+  }
+
+  .post__back:hover {
+    color: var(--color-primary);
+  }
+
   .post__meta {
     font-family: var(--font-mono);
     font-size: 0.85rem;
@@ -158,7 +197,17 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 
   .post__content :global(img) {
     max-width: 100%;
+    height: auto;
     border-radius: var(--radius-card);
+  }
+
+  /* Real phone screenshots (tall/portrait JPEGs) shouldn't stretch to the
+     full article width like the wide diagrams do — cap them to a
+     realistic phone width and center them instead. */
+  .post__content :global(img[src*='origFormat%3Djpg']) {
+    display: block;
+    max-width: 320px;
+    margin: 0 auto;
   }
 
   .post__content :global(a) {
@@ -173,7 +222,9 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 
   .post-sidebar {
     position: sticky;
-    top: 88px;
+    /* Just enough to clear the sticky navbar (64px tall) — any more than
+       that is just dead space above "Tags" once it's pinned. */
+    top: 68px;
   }
 
   .post-sidebar__section {
@@ -207,15 +258,76 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     border-top: 1px solid var(--color-border);
   }
 
+  /* Bottom-left (not right) so it never collides with the mobile nav's
+     floating menu button. Hidden until near the end of the post, and
+     deliberately understated once visible — translucent, blurred,
+     muted colors, no gradient — since this is a "done reading, take me
+     up" convenience, not a CTA. */
+  .back-to-top {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 900;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease, color 0.15s ease;
+  }
+
+  .back-to-top.is-visible {
+    opacity: 0.45;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    opacity: 0.9;
+    color: var(--color-primary);
+  }
+
   @media (max-width: 860px) {
     .post-layout {
-      grid-template-columns: 1fr;
+      /* minmax(0, ...), not a bare 1fr — a plain 1fr still defaults to
+         min-width: auto for grid track sizing, so a wide image or
+         unbreakable text (the file-tree screenshot in this post, for
+         instance) blows out the track — and the whole page — past the
+         viewport width. */
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
     }
 
     .post-sidebar {
       position: static;
       border-top: 1px solid var(--color-border);
       padding-top: 24px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .post-layout {
+      padding-top: 32px;
+    }
+
+    .post__content :global(pre) {
+      padding: 12px;
+      font-size: 0.85rem;
+    }
+
+    /* Leave room so the fixed mobile nav FAB doesn't cover the last
+       comment / GitHub-edit link. */
+    .post-sidebar__github {
+      margin-bottom: 80px;
     }
   }
 </style>

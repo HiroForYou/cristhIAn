@@ -31,6 +31,19 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
       <p class="eyebrow">Writing</p>
       <h1>Blog</h1>
 
+      <label class="blog-search" for="blog-search-input">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          type="text"
+          id="blog-search-input"
+          placeholder="Search posts or tags…"
+          autocomplete="off"
+        />
+      </label>
+
       <div class="blog-controls">
         <div class="blog-controls__tags" id="blog-tag-filter">
           <button type="button" class="tag is-active" data-tag="all">All</button>
@@ -70,7 +83,11 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
       <ul class="blog-index__list" id="blog-post-list">
         {
           posts.map(post => (
-            <li data-tags={post.data.tags.map(slugify).join(',')} data-date={post.data.date.toISOString()}>
+            <li
+              data-tags={post.data.tags.map(slugify).join(',')}
+              data-date={post.data.date.toISOString()}
+              data-search={`${post.data.title} ${post.data.tags.join(' ')}`.toLowerCase()}
+            >
               <div class="card blog-index__card">
                 <span class="blog-index__date">{dateFormatter.format(post.data.date)}</span>
                 <h2>
@@ -80,7 +97,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
                 </h2>
                 <div class="blog-index__tags">
                   {post.data.tags.map(tag => (
-                    <a class="tag" href={`/blog/tags/${slugify(tag)}/`}>
+                    <a class="tag" href={`/blog?tag=${slugify(tag)}`}>
                       {tag}
                     </a>
                   ))}
@@ -102,6 +119,44 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 <style>
   .blog-index {
     padding-top: 64px;
+  }
+
+  .blog-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 360px;
+    margin-top: 32px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    color: var(--color-text-muted);
+    transition: border-color 0.15s ease;
+  }
+
+  .blog-search:focus-within {
+    border-color: var(--color-primary-light);
+  }
+
+  .blog-search svg {
+    flex: none;
+  }
+
+  .blog-search input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    font-size: 0.9rem;
+  }
+
+  .blog-search input:focus {
+    outline: none;
+  }
+
+  .blog-search input::placeholder {
+    color: var(--color-text-muted);
   }
 
   .blog-controls {
@@ -213,20 +268,29 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 
   const tagButtons = Array.from(document.querySelectorAll('#blog-tag-filter [data-tag]'));
   const sortButtons = Array.from(document.querySelectorAll('#blog-sort [data-sort]'));
+  const searchInput = document.getElementById('blog-search-input');
 
   let activeTag = 'all';
   let activeSort = 'desc';
+  let searchQuery = '';
 
   function applyFilter() {
     let visibleCount = 0;
     items.forEach(item => {
       const tags = (item.getAttribute('data-tags') ?? '').split(',');
-      const visible = activeTag === 'all' || tags.includes(activeTag);
+      const matchesTag = activeTag === 'all' || tags.includes(activeTag);
+      const matchesSearch = !searchQuery || (item.getAttribute('data-search') ?? '').includes(searchQuery);
+      const visible = matchesTag && matchesSearch;
       item.hidden = !visible;
       if (visible) visibleCount++;
     });
     if (emptyMessage) emptyMessage.hidden = visibleCount > 0;
   }
+
+  searchInput?.addEventListener('input', () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    applyFilter();
+  });
 
   function applySort() {
     if (!list) return;
@@ -265,4 +329,23 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     });
     moreButton.textContent = expanding ? 'Show less' : moreLabel;
   });
+
+  // Landing here via a tag link (e.g. /blog?tag=python from a post's sidebar
+  // or another post's tag chip) pre-selects that filter instead of just
+  // dropping the visitor on the unfiltered list.
+  const requestedTag = new URLSearchParams(window.location.search).get('tag');
+  if (requestedTag) {
+    const targetButton = tagButtons.find(button => button.getAttribute('data-tag') === requestedTag);
+    if (targetButton) {
+      if (targetButton.hasAttribute('data-overflow-tag')) {
+        overflowTagButtons.forEach(button => {
+          button.hidden = false;
+        });
+        if (moreButton) moreButton.textContent = 'Show less';
+      }
+      activeTag = requestedTag;
+      tagButtons.forEach(button => button.classList.toggle('is-active', button === targetButton));
+      applyFilter();
+    }
+  }
 </script>

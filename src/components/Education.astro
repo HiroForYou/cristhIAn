@@ -1,0 +1,271 @@
+---
+import { education, achievements, certificates, presentations } from '@/data/education.js';
+---
+
+<section id="education">
+  <div class="container">
+    <p class="eyebrow">Academics</p>
+    <h2>Education & Achievements</h2>
+
+    <div class="edu-grid">
+      <div class="card edu-block">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 9 12 4 2 9l10 5 10-5Z" />
+            <path d="M6 11v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
+          </svg>
+          Education
+        </h3>
+        <ul class="edu-list">
+          {
+            education.map(entry => (
+              <li>
+                <div class="edu-list__head">
+                  <p class="edu-list__title">{entry.degree}</p>
+                  <span class="edu-list__date">{entry.dateRange}</span>
+                </div>
+                <p class="edu-list__meta">
+                  {entry.href ? (
+                    <a href={entry.href} target="_blank" rel="noopener noreferrer">
+                      {entry.institution}
+                    </a>
+                  ) : (
+                    entry.institution
+                  )}
+                </p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="card edu-block">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" />
+            <path d="m9 14-1.5 6.5L12 18l4.5 2.5L15 14" />
+          </svg>
+          Achievements
+        </h3>
+        <ul class="edu-list">
+          {
+            achievements.map(item => (
+              <li>
+                <span class="edu-list__date edu-list__date--block">{item.dateRange}</span>
+                <p class="edu-list__meta edu-list__meta--plain">{item.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="card edu-block edu-certificates">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z" />
+          <path d="m9 14.5-1 6 4-2 4 2-1-6" />
+        </svg>
+        Certificates
+      </h3>
+      <ul class="edu-cert-list">
+        {
+          certificates.map(cert => (
+            <li>
+              <a href={cert.href} target="_blank" rel="noopener noreferrer">
+                {cert.name}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 17 17 7M9 7h8v8" />
+                </svg>
+              </a>
+              <span class="edu-cert-list__issuer"> — {cert.issuer}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="card edu-block">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3" />
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v4M9 22h6" />
+        </svg>
+        Presentations
+      </h3>
+      <ul class="edu-presentations">
+        {
+          presentations.map(talk => (
+            <li>
+              <span class="edu-presentations__date">{talk.date}</span>
+              <span class="edu-presentations__body">
+                <a href={talk.href} target="_blank" rel="noopener noreferrer">
+                  {talk.title}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 17 17 7M9 7h8v8" />
+                  </svg>
+                </a>
+                <span class="edu-presentations__venue"> — {talk.venue}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  #education {
+    /* Experience's own bottom padding + this section's top padding would
+       otherwise stack to the full clamp() on both sides — too much dead
+       space between two content-dense sections. */
+    padding-top: 48px;
+  }
+
+  .edu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .edu-block {
+    margin-top: 16px;
+  }
+
+  .edu-grid .edu-block {
+    margin-top: 0;
+  }
+
+  .edu-block h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    margin-bottom: 14px;
+  }
+
+  .edu-block h3 svg {
+    color: var(--color-primary);
+    flex: none;
+  }
+
+  .edu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .edu-list li {
+    margin-bottom: 14px;
+  }
+
+  .edu-list li:last-child {
+    margin-bottom: 0;
+  }
+
+  .edu-list__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .edu-list__title {
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .edu-list__meta {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .edu-list__meta a {
+    color: var(--color-primary);
+  }
+
+  .edu-list__date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    flex: none;
+  }
+
+  .edu-list__date--block {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .edu-list__meta--plain {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  .edu-cert-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .edu-cert-list a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--color-primary);
+  }
+
+  .edu-cert-list a svg {
+    opacity: 0.6;
+  }
+
+  .edu-cert-list__issuer {
+    color: var(--color-text-muted);
+  }
+
+  .edu-presentations {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .edu-presentations li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .edu-presentations__date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    flex: none;
+    width: 72px;
+  }
+
+  .edu-presentations__body a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--color-primary);
+  }
+
+  .edu-presentations__body a svg {
+    opacity: 0.6;
+  }
+
+  .edu-presentations__venue {
+    color: var(--color-text-muted);
+  }
+</style>

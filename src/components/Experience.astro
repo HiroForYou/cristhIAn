@@ -75,6 +75,12 @@ const olderEntries = experience.slice(VISIBLE_COUNT);
 </script>
 
 <style>
+  /* Education directly follows this section; without trimming, both
+     sides' clamp()-based padding stack into an oversized gap. */
+  #experience {
+    padding-bottom: 40px;
+  }
+
   .timeline {
     list-style: none;
     margin: 32px 0 0;

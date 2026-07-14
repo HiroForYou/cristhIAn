@@ -12,3 +12,12 @@ import SmallProjects from './SmallProjects.astro';
     <SmallProjects />
   </div>
 </section>
+
+<style>
+  #projects {
+    /* SmallProjects' own bottom padding plus the default section padding on
+       both sides of the Projects→Contact boundary was stacking into a much
+       bigger gap than any other section transition on the page. */
+    padding-bottom: 40px;
+  }
+</style>
