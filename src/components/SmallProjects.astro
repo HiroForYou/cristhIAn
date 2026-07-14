@@ -2,14 +2,14 @@
 import smallProjects from '@/data/smallprojects.json';
 ---
 
-<div class="small-projects">
+<div class="small-projects" id="small-projects-carousel">
   <div class="small-projects__skew" aria-hidden="true"></div>
 
   <div class="container">
     <h3 class="small-projects__title">Small Projects</h3>
   </div>
 
-  <div class="carousel" id="small-projects-carousel">
+  <div class="carousel">
     <div class="carousel__track">
       {
         smallProjects.map(project => (
@@ -48,7 +48,11 @@ import smallProjects from '@/data/smallprojects.json';
 
   .small-projects__skew {
     position: absolute;
-    inset: 0;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    margin-left: -50vw;
     background: var(--color-surface);
     transform: skewY(-3deg);
     z-index: -1;
@@ -66,23 +70,10 @@ import smallProjects from '@/data/smallprojects.json';
     right: 50%;
     margin-left: -50vw;
     margin-right: -50vw;
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent,
-      black 60px,
-      black calc(100% - 60px),
-      transparent
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      black 60px,
-      black calc(100% - 60px),
-      transparent
-    );
   }
 
   .carousel__track {
+    position: relative;
     display: flex;
     gap: 16px;
     overflow-x: auto;
@@ -99,8 +90,8 @@ import smallProjects from '@/data/smallprojects.json';
   }
 
   .carousel__slide {
-    flex: 0 0 260px;
-    scroll-snap-align: center;
+    flex: 0 0 100%;
+    scroll-snap-align: start;
   }
 
   .small-project {
@@ -150,13 +141,15 @@ import smallProjects from '@/data/smallprojects.json';
 
   @media (min-width: 640px) {
     .carousel__slide {
-      flex-basis: 300px;
+      /* exactly 2 per page — no partial 3rd peeking in */
+      flex-basis: calc((100% - 16px) / 2);
     }
   }
 
   @media (min-width: 1000px) {
     .carousel__slide {
-      flex-basis: 320px;
+      /* exactly 3 per page — no partial 4th peeking in */
+      flex-basis: calc((100% - 32px) / 3);
     }
   }
 </style>
@@ -175,7 +168,9 @@ import smallProjects from '@/data/smallprojects.json';
     if (!track || !slide) return;
     // Scroll the track's own scrollLeft directly (never scrollIntoView: it can
     // escape to the document/window and yank the whole page around vertically).
-    const targetLeft = slide.offsetLeft - (track.clientWidth - slide.clientWidth) / 2;
+    // Align to the slide's start (not centered) so exactly N full cards show,
+    // sliding the window by one card at a time like the original carousel.
+    const targetLeft = index === 0 ? 0 : slide.offsetLeft;
     track.scrollTo({ left: targetLeft, behavior: 'smooth' });
   }
 
@@ -191,14 +186,19 @@ import smallProjects from '@/data/smallprojects.json';
     });
   });
 
+  // With 2-3 slides visible at once, several intersect simultaneously — track
+  // the whole visible set and use the leftmost as "active" (matches which dot
+  // the current page/step corresponds to).
+  const visibleIndexes = new Set();
   const observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const index = slides.indexOf(entry.target);
-          if (index !== -1) setActive(index);
-        }
+        const index = slides.indexOf(entry.target);
+        if (index === -1) return;
+        if (entry.isIntersecting) visibleIndexes.add(index);
+        else visibleIndexes.delete(index);
       });
+      if (visibleIndexes.size) setActive(Math.min(...visibleIndexes));
     },
     { root: track, threshold: 0.6 }
   );

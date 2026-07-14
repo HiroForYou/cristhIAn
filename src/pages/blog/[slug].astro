@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
 import { getCollection, render } from 'astro:content';
 import { slugify } from '@/utils/slugify.js';
+import { readingTime } from '@/utils/readingTime.js';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -16,6 +17,24 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 
+const allPosts = await getCollection('blog');
+const tagCounts = new Map();
+allPosts.forEach(p => {
+  p.data.tags.forEach(tag => {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  });
+});
+const allTags = Array.from(tagCounts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+
+const minutes = readingTime(post.body);
+const postUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const shareLinks = {
+  facebook: `https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`,
+  twitter: `https://twitter.com/share?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(postUrl)}`,
+  reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(post.data.title)}`,
+};
+const githubEditUrl = `https://github.com/HiroForYou/cristhian/tree/develop/src/content/blog/${post.slug}/index.md`;
+
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'short',
@@ -26,23 +45,60 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 <Layout title={`${post.data.title} — Cristhian Wiki`} description={post.data.excerpt}>
   <Navbar client:load />
   <main>
-    <article class="container post">
-      <p class="post__date">{dateFormatter.format(post.data.date)} · {post.data.author}</p>
-      <h1>{post.data.title}</h1>
-      <div class="post__tags">
-        {post.data.tags.map(tag => (
-          <a class="tag" href={`/blog/tags/${slugify(tag)}/`}>
-            {tag}
-          </a>
-        ))}
-      </div>
+    <div class="container post-layout">
+      <article class="post">
+        <p class="post__meta">
+          {dateFormatter.format(post.data.date)} · {minutes} min read
+        </p>
+        <h1>{post.data.title}</h1>
 
-      <div class="post__content">
-        <Content />
-      </div>
+        <div class="post__content">
+          <Content />
+        </div>
 
-      <div id="disqus_thread" class="post__comments"></div>
-    </article>
+        <div id="disqus_thread" class="post__comments"></div>
+      </article>
+
+      <aside class="post-sidebar">
+        <section class="post-sidebar__section">
+          <h2>Tags</h2>
+          <div class="post-sidebar__tags">
+            {
+              allTags.map(([tag, count]) => (
+                <a class="tag" href={`/blog/tags/${slugify(tag)}/`}>
+                  {tag}, {count}
+                </a>
+              ))
+            }
+          </div>
+        </section>
+
+        <section class="post-sidebar__section">
+          <h2>Share on</h2>
+          <div class="post-sidebar__share">
+            <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13.5 21v-7.5H16l.5-3h-3V8.2c0-.87.24-1.46 1.5-1.46H16.6V4.14C16.3 4.1 15.3 4 14.1 4c-2.4 0-4 1.47-4 4.16V10.5H7.6v3H10V21h3.5Z"></path>
+              </svg>
+            </a>
+            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.7 11.7 0 0 1 3.4 4.6a4.1 4.1 0 0 0 1.3 5.5c-.6 0-1.2-.2-1.8-.5v.1c0 2 1.4 3.6 3.3 4a4.2 4.2 0 0 1-1.9.1 4.1 4.1 0 0 0 3.9 2.9A8.3 8.3 0 0 1 2 18.6a11.7 11.7 0 0 0 6.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1Z"></path>
+              </svg>
+            </a>
+            <a href={shareLinks.reddit} target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 12.3a2.2 2.2 0 0 0-3.7-1.6 10.7 10.7 0 0 0-5.6-1.7l1-4.5 3.2.7a1.5 1.5 0 1 0 .2-.9l-3.6-.8a.5.5 0 0 0-.6.4l-1.1 5a10.7 10.7 0 0 0-5.7 1.7A2.2 2.2 0 0 0 2 12.3c0 .8.4 1.5 1 1.9v.4c0 3 3.5 5.4 7.9 5.4s7.9-2.4 7.9-5.4v-.4c.6-.4 1.2-1.1 1.2-1.9ZM8 13.6a1.2 1.2 0 1 1 2.4 0 1.2 1.2 0 0 1-2.4 0Zm7.6 3a5.9 5.9 0 0 1-3.6 1c-1.3 0-2.6-.3-3.6-1a.4.4 0 0 1 .5-.6c.9.6 2 .9 3.1.9s2.2-.3 3.1-.9a.4.4 0 0 1 .5.6Zm-.3-1.8a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z"></path>
+              </svg>
+            </a>
+          </div>
+        </section>
+
+        <a class="post-sidebar__github" href={githubEditUrl} target="_blank" rel="noopener noreferrer">
+          Edit post on GitHub
+        </a>
+      </aside>
+    </div>
   </main>
   <Footer />
 </Layout>
@@ -50,7 +106,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 <script define:vars={{
   shortname: 'https-hiroforyou-github-io-cristhian',
   identifier: post.slug,
-  url: new URL(Astro.url.pathname, Astro.site).toString(),
+  url: postUrl,
   title: post.data.title,
 }}>
   window.disqus_config = function () {
@@ -67,25 +123,25 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 </script>
 
 <style>
-  .post {
+  .post-layout {
     padding-top: 64px;
-    max-width: 720px;
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 48px;
+    align-items: start;
   }
 
-  .post__date {
+  .post__meta {
     font-family: var(--font-mono);
     font-size: 0.85rem;
     color: var(--color-text-muted);
-  }
-
-  .post__tags {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
   }
 
   .post__content {
     line-height: 1.75;
+    margin-top: 24px;
   }
 
   .post__content :global(h2) {
@@ -113,5 +169,53 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     margin-top: 48px;
     padding-top: 32px;
     border-top: 1px solid var(--color-border);
+  }
+
+  .post-sidebar {
+    position: sticky;
+    top: 88px;
+  }
+
+  .post-sidebar__section {
+    margin-bottom: 32px;
+  }
+
+  .post-sidebar__section h2 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .post-sidebar__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .post-sidebar__share {
+    display: flex;
+    gap: 14px;
+  }
+
+  .post-sidebar__share a {
+    color: var(--color-primary);
+  }
+
+  .post-sidebar__github {
+    display: inline-block;
+    font-size: 0.9rem;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 860px) {
+    .post-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .post-sidebar {
+      position: static;
+      border-top: 1px solid var(--color-border);
+      padding-top: 24px;
+    }
   }
 </style>
