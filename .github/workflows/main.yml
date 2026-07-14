@@ -3,8 +3,7 @@ name: GitHub Pages
 on:
   push:
     branches:
-      - develop # production deploy
-      - astro-migration # build validation while the redesign is in progress
+      - astro-migration # production deploy
   pull_request:
 
 jobs:
@@ -33,7 +32,7 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/develop' }}
+        if: ${{ github.ref == 'refs/heads/astro-migration' }}
         with:
           personal_token: ${{ secrets.cristhIAn }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
