@@ -1,115 +1,71 @@
 <p align="center">
-  <a href="http://www.cristhianwiki.com/">
-    <img alt="Gatsby" src="./src/static/logo_noalpha.svg" width="100" />
-    <h2 align="center">Cristhian Wiki</h2>
+  <a href="https://www.cristhianwiki.com/">
+    <img alt="cristhIAn" src="./public/favicon.svg" width="80" />
   </a>
-</p> 
-<p align="center">Machine Learning Engineer</p>
+</p>
+<h1 align="center">cristhianwiki.com</h1>
+<p align="center">My personal site and blog — rebuilt in Astro.</p>
 
+<p align="center">
+  <img alt="Site preview" src="./public/images/social-banner.jpg" width="600" />
+</p>
 
-![Cristhian Wiki](./src/static/screenshot.png)
+This used to be a Gatsby site. I migrated it to Astro to cut the JS-framework
+weight down to just the two things on the page that actually need to be
+interactive (the navbar and the theme toggle) and leave everything else as
+plain, fast, static HTML.
 
-*NOTE: If you are using this site as a template for your own portfolio site, I would be very glad if you add a link to the original site with my name in footer*
+## Stack
 
-## :rocket: Quick start
+- [Astro](https://astro.build) for the site itself, with a couple of React
+  islands (`client:load`) where actual interactivity is needed
+- No Tailwind, no UI kit — just hand-written CSS with custom properties for
+  theming (light/dark, plus a dev-only brand-palette toggle)
+- `pnpm`, not npm — the lockfile is `pnpm-lock.yaml`, don't fight it
+- Blog posts are plain Markdown content collections
+  (`src/content/blog/<slug>/index.md`)
+- Deployed via GitHub Actions straight to GitHub Pages
 
-**Run the site locally**
-
-_NOTE: The default branch for this repo is `develop`, when you push or pull make sure you specify the correct branch_
-
-### Step 1: Clone The Repo
-
-Fork the repository. then clone the repo locally by doing -
+## Running it locally
 
 ```bash
 git clone https://github.com/HiroForYou/cristhIAn.git
-```
-
-### Step 2: Install Dependencies
-
-cd into the directory
-
-```bash
 cd cristhIAn
+pnpm install
+pnpm dev
 ```
 
-install all the dependencies
-```bash
-npm install
+That starts the dev server on `http://localhost:4321`. `pnpm build` produces
+the static site in `dist/`, and `pnpm preview` serves that build locally so
+you can sanity-check it before pushing.
+
+## Where things live
+
+```
+src/
+├── components/  # one .astro (or .jsx, for the two interactive bits) per section
+├── config/      # theme palette definitions
+├── content/     # blog posts + case studies (Markdown)
+├── data/        # experience, tech stack, education — plain JS arrays
+├── layouts/     # the single shared <Layout>
+├── pages/       # routes (index, blog list/post, case studies)
+├── styles/      # global.css — tokens, resets, section spacing
+└── utils/       # slugify, reading-time helpers
 ```
 
-### Step 3: Start Development Server
+If you just want to add or edit a blog post, you don't need to touch anything
+else — drop a folder in `src/content/blog/` with an `index.md` and an
+`images/` subfolder if it needs any.
 
-Then start the development Server
-```
-npm run develop
-```
-After running the development server the site should be running on https://localhost:8000
+## Deploying
 
+Pushing to `astro-migration` (the active branch — `develop` and the old
+Gatsby history live on under `old` now) runs the GitHub Actions workflow in
+`.github/workflows/main.yml`: it builds the site, then publishes `dist/` to
+`gh-pages` via `peaceiris/actions-gh-pages`, which is what serves
+`www.cristhianwiki.com`.
 
-## :open_file_folder: What's inside?
+---
 
-A quick look at the folder structure of this project.
-
-    .
-    ├── content
-    │   ├───blog
-    │   ├───case-studies
-    │   └───json
-    ├── cypress
-    ├── plugins
-    └── src
-        ├───components
-        │   ├───About
-        │   ├───Blog
-        │   ├───common
-        │   ├───Concepts
-        │   ├───Contact
-        │   ├───CreativeCoding
-        │   ├───Home
-        │   ├───Layout
-        │   │   └───Navbar
-        │   ├───Lightbox
-        │   ├───Projects
-        │   └───Skills
-        ├───hooks
-        ├───pages
-        ├───static
-        │   └───images
-        ├───styles
-        └───templates
-
-
-## Tools Used
-
-1. Gatsby.js (of course)
-2. Styled Components for styling
-3. Cypress for E2E Testing
-4. Jest for Unit Testing
-5. TravisCI for CI/CD
-
-## :v: Contributing
-
-*NOTE: if you want to change the [blog content](./content) or fix any typo you can do that from github's ui without cloning the repo locally*
-
-After cloning & setting up the local project you can push the changes to your github fork and make a pull request.
-
-> You can also run the tests locally to see if everything works fine with
-
-### Running tests
-```bash
-npm run test
-npm run test:e2e
-```
-
-### Pushing the changes
-
-```bash
-git add .
-git commit -m "first commit"
-git push https://github.com/HiroForYou/cristhIAn develop
-```
-
-------
-
-Made with :heart: and Gatsbyjs
+If you're using this as a template for your own site, a link back here with
+my name somewhere in the footer would be appreciated — but no pressure.

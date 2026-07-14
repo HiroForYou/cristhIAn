@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - astro-migration # production deploy
+    paths-ignore:
+      - "**.md"
+      - "!src/content/**/*.md" # blog posts / case studies still deploy
   pull_request:
 
 jobs:
