@@ -5,6 +5,7 @@
 </p>
 <h1 align="center">cristhianwiki.com</h1>
 <p align="center">My personal site and blog — rebuilt in Astro.</p>
+<p align="center"><b>English</b> · <a href="README.es.md">Español</a></p>
 
 <p align="center">
   <img alt="Site preview" src="./public/images/social-banner.jpg" width="600" />
