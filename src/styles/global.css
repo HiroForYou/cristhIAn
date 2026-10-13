@@ -10,6 +10,7 @@
   --font-serif: 'Instrument Serif', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
+  --nav-h: 76px;
   --radius-card: 12px;
   --content-width: 1240px;
   --section-spacing: clamp(64px, 10vw, 120px);
@@ -61,6 +62,9 @@ body {
 
 main {
   flex: 1;
+  /* The navbar is fixed and floats over the page; this keeps the first
+     section from starting underneath it. */
+  padding-top: var(--nav-h);
 }
 
 h1,
@@ -129,8 +133,8 @@ kbd {
 
 section {
   padding-block: var(--section-spacing);
-  /* Anchor jumps stop below the sticky 64px navbar instead of under it. */
-  scroll-margin-top: 56px;
+  /* Anchor jumps stop below the floating navbar instead of under it. */
+  scroll-margin-top: calc(var(--nav-h) - 8px);
 }
 
 .eyebrow {

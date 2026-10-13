@@ -236,9 +236,9 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 
   .post-sidebar {
     position: sticky;
-    /* Just enough to clear the sticky navbar (64px tall) — any more than
-       that is just dead space above "Tags" once it's pinned. */
-    top: 68px;
+    /* Just enough to clear the floating navbar — any more than that is
+       just dead space above "Tags" once it's pinned. */
+    top: calc(var(--nav-h) + 4px);
   }
 
   .post-sidebar__section {

@@ -99,6 +99,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           syncTouch: false,
           anchors: { duration: 1.4 },
         });
+        // The navbar's menu overlay pauses scrolling through this handle.
+        (window as Window & { __lenis?: Lenis }).__lenis = lenis;
         const loop = (time: number) => {
           lenis.raf(time);
           requestAnimationFrame(loop);

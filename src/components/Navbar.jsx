@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import './Navbar.css';
 
 const links = [
@@ -62,25 +62,41 @@ const ModeToggle = ({ mode, onToggle }) => (
 // Hash links that point at a section on the home page ("/#experience").
 const sectionIds = links.map(link => link.href.split('#')[1]).filter(Boolean);
 
+// Lenis is mounted in Layout.astro; pause it while the menu overlay is open
+// so wheel input can't scroll the page underneath.
+const setPageScrollLocked = locked => {
+  const lenis = window.__lenis;
+  if (lenis) locked ? lenis.stop() : lenis.start();
+  document.documentElement.style.overflow = locked ? 'hidden' : '';
+};
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState('dark');
+  const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState(null);
-  const [indicator, setIndicator] = useState(null);
   const progressRef = useRef(null);
-  const linksRef = useRef(null);
+  const pillRef = useRef(null);
+  const indicatorRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const firstOverlayLinkRef = useRef(null);
 
-  // Scroll progress bar + which section the reader is in. Both are read
-  // from one rAF-throttled scroll handler; the bar is written straight to
-  // the DOM so scrolling never re-renders the navbar.
+  useEffect(() => {
+    setMode(document.documentElement.dataset.mode === 'light' ? 'light' : 'dark');
+  }, []);
+
+  // Scrolled state, progress bar and active section, all from one
+  // rAF-throttled scroll handler. The bar is written straight to the DOM.
   useEffect(() => {
     let frame = 0;
     const measure = () => {
       frame = 0;
+      const y = window.scrollY;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       if (progressRef.current) {
-        progressRef.current.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+        progressRef.current.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
       }
+      setScrolled(y > 40);
       const line = window.innerHeight * 0.4;
       let current = null;
       for (const id of sectionIds) {
@@ -102,27 +118,44 @@ const Navbar = () => {
     };
   }, []);
 
-  // Slide the pill under the active link.
-  useEffect(() => {
-    const place = () => {
-      const link = activeId && linksRef.current?.querySelector(`a[href="/#${activeId}"]`);
-      setIndicator(link ? { left: link.offsetLeft, width: link.offsetWidth } : null);
-    };
-    place();
-    window.addEventListener('resize', place);
-    document.fonts?.ready.then(place);
-    return () => window.removeEventListener('resize', place);
+  // Slide the solid indicator under the active link.
+  const placeIndicator = useCallback(() => {
+    const pill = pillRef.current;
+    const indicator = indicatorRef.current;
+    if (!pill || !indicator) return;
+    const link = activeId && pill.querySelector(`a[href="/#${activeId}"]`);
+    if (!link) {
+      indicator.style.opacity = '0';
+      return;
+    }
+    indicator.style.opacity = '1';
+    indicator.style.width = `${link.offsetWidth}px`;
+    indicator.style.transform = `translateX(${link.offsetLeft}px)`;
   }, [activeId]);
 
+  useLayoutEffect(placeIndicator, [placeIndicator]);
   useEffect(() => {
-    setMode(document.documentElement.dataset.mode === 'light' ? 'light' : 'dark');
-  }, []);
+    window.addEventListener('resize', placeIndicator);
+    document.fonts?.ready.then(placeIndicator);
+    return () => window.removeEventListener('resize', placeIndicator);
+  }, [placeIndicator]);
 
+  // Mobile overlay: lock page scroll, close on Esc, move focus in and back.
   useEffect(() => {
     if (!isOpen) return;
-    const closeOnScroll = () => setIsOpen(false);
-    window.addEventListener('scroll', closeOnScroll, { passive: true });
-    return () => window.removeEventListener('scroll', closeOnScroll);
+    const button = menuButtonRef.current;
+    setPageScrollLocked(true);
+    const focusTimer = setTimeout(() => firstOverlayLinkRef.current?.focus(), 120);
+    const onKey = event => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      clearTimeout(focusTimer);
+      setPageScrollLocked(false);
+      window.removeEventListener('keydown', onKey);
+      button?.focus({ preventScroll: true });
+    };
   }, [isOpen]);
 
   const toggleMode = () => {
@@ -134,59 +167,81 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="navbar">
+      <div className="navbar__progress" ref={progressRef} aria-hidden="true" />
+
+      <header className={`navbar${scrolled ? ' is-scrolled' : ''}`}>
         <div className="navbar__inner container">
           <a href="/" className="navbar__brand" aria-label="Cristhian Wiki — home">
-            <FlameLogo />
-            <span>cristhIAn</span>
+            <span className="navbar__mark">
+              <FlameLogo />
+            </span>
+            <span className="navbar__name">cristhIAn</span>
           </a>
 
-          <nav className="navbar__links navbar__links--desktop" ref={linksRef}>
-            <span
-              className={`navbar__indicator${indicator ? ' is-visible' : ''}`}
-              aria-hidden="true"
-              style={indicator ? { transform: `translateX(${indicator.left}px)`, width: indicator.width } : undefined}
-            />
-            {links.map(link => (
-              <a
-                key={link.href}
-                href={link.href}
-                aria-current={activeId && link.href === `/#${activeId}` ? 'true' : undefined}
-              >
-                {link.label}
-              </a>
-            ))}
+          <div className="navbar__right">
+            <nav className="navbar__pill" ref={pillRef} aria-label="Primary">
+              <span className="navbar__indicator" ref={indicatorRef} aria-hidden="true" />
+              {links.map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="navbar__link"
+                  aria-current={activeId && link.href === `/#${activeId}` ? 'true' : undefined}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
             <ModeToggle mode={mode} onToggle={toggleMode} />
-          </nav>
+            <button
+              ref={menuButtonRef}
+              type="button"
+              className="navbar__menu-btn"
+              aria-expanded={isOpen}
+              aria-controls="menu-overlay"
+              onClick={() => setIsOpen(true)}
+            >
+              Menu <i aria-hidden="true" />
+            </button>
+          </div>
         </div>
-        <span className="navbar__progress" ref={progressRef} aria-hidden="true" />
       </header>
 
-      {/* Rendered outside <header> on purpose: .navbar has backdrop-filter,
-          which creates a new containing block for position:fixed
-          descendants — nested here, "fixed" would resolve against the
-          ~64px-tall header instead of the viewport. */}
-      <div className="navbar__fab-wrapper">
-        {isOpen && (
-          <nav className="navbar__fab-links">
-            {links.map(link => (
-              <a key={link.href} href={link.href} onClick={() => setIsOpen(false)}>
+      <div
+        id="menu-overlay"
+        className={`navbar-overlay${isOpen ? ' is-open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        inert={isOpen ? undefined : ''}
+      >
+        <div className="container navbar-overlay__top">
+          <span className="navbar__mark navbar__mark--filled">
+            <FlameLogo />
+          </span>
+          <button type="button" className="navbar-overlay__close" onClick={() => setIsOpen(false)}>
+            Close
+          </button>
+        </div>
+        <ul className="container navbar-overlay__list">
+          {links.map((link, i) => (
+            <li key={link.href}>
+              <a
+                ref={i === 0 ? firstOverlayLinkRef : undefined}
+                href={link.href}
+                style={{ '--i': i }}
+                onClick={() => setIsOpen(false)}
+              >
+                <small>{String(i + 1).padStart(2, '0')}</small>
                 {link.label}
               </a>
-            ))}
-            <ModeToggle mode={mode} onToggle={toggleMode} />
-          </nav>
-        )}
-        <button
-          className={`navbar__fab${isOpen ? ' is-open' : ''}`}
-          aria-label="Toggle menu"
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen(open => !open)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+            </li>
+          ))}
+        </ul>
+        <div className="container navbar-overlay__foot">
+          <a href="mailto:christiansanchezsaune@gmail.com">christiansanchezsaune@gmail.com</a>
+          <ModeToggle mode={mode} onToggle={toggleMode} />
+        </div>
       </div>
     </>
   );
