@@ -1,13 +1,13 @@
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/800.css';
+@import '@fontsource-variable/inter-tight/wght.css';
+@import '@fontsource/instrument-serif/400-italic.css';
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/600.css';
 
 /* Color tokens (--color-*, --gradient-primary) come from ThemeVars.astro,
    generated from src/config/palettes.js and scoped by [data-theme]. */
 :root {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter Tight Variable', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   --radius-card: 12px;
@@ -67,9 +67,25 @@ h1,
 h2,
 h3,
 h4 {
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.2;
   margin: 0 0 0.5em;
+}
+
+h1,
+h2 {
+  letter-spacing: -0.02em;
+}
+
+/* Accent words inside headings switch to the italic serif. */
+h1 em,
+h2 em,
+h3 em,
+.accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 p {
@@ -113,6 +129,8 @@ kbd {
 
 section {
   padding-block: var(--section-spacing);
+  /* Anchor jumps stop below the sticky 64px navbar instead of under it. */
+  scroll-margin-top: 56px;
 }
 
 .eyebrow {
@@ -123,6 +141,36 @@ section {
   color: var(--color-primary-light);
   text-transform: uppercase;
   margin-bottom: 12px;
+}
+
+/* Section number in front of the label: "01  About". */
+.eyebrow b {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-right: 0.9em;
+}
+
+.section-title {
+  font-size: clamp(2rem, 4.2vw, 3.25rem);
+  line-height: 1.05;
+  margin-bottom: 0;
+}
+
+/* Reveal on scroll. Elements only start hidden once the observer in
+   Layout.astro has armed (html.rv-ready), so without JS — or with
+   reduced motion — everything simply renders in place. */
+.rv-ready .rv {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--rv-i, 0) * 80ms);
+}
+
+.rv-ready .rv.is-in {
+  opacity: 1;
+  transform: none;
 }
 
 .card {

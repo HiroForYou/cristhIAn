@@ -1,8 +1,10 @@
+// `start` (YYYY-MM) orders the merged education + experience timeline.
 export const experience = [
   {
     company: 'Seidor Analytics',
     role: 'Senior Machine Learning Engineer — Consultant',
     dateRange: 'Jun 2025 — Present · Lima, PE (Hybrid)',
+    start: '2025-06',
     bullets: [
       'Designed scalable data platforms and end-to-end ML systems for beverage-industry clients across LATAM (Koandina, Bodegas La Negrita, Arca Continental, Industrias San Miguel).',
       'Built real-time data architectures (AWS Kinesis, Glue, Athena, AppSync) and end-to-end MLOps pipelines in Snowflake ML with Feature Store and Model Registry.',
@@ -13,6 +15,7 @@ export const experience = [
     company: 'Sokso',
     role: 'Tech Lead',
     dateRange: 'Nov 2024 — Jun 2025 · Lima, PE (Hybrid)',
+    start: '2024-11',
     bullets: [
       'Led architectural design of the SMART 3.0 platform, setting technical standards and guiding backend/frontend teams.',
       'Headed the ERP migration from SAP to NetSuite, coordinating critical data transfer and business-process redesign.',
@@ -23,6 +26,7 @@ export const experience = [
     company: 'Sokso',
     role: 'Full Stack Developer',
     dateRange: 'Nov 2023 — Nov 2024 · Lima, PE (Hybrid)',
+    start: '2023-11',
     bullets: [
       "Led frontend (Vue.js) improvements for the SMART 2.0 platform and strengthened cybersecurity standards across frontend/backend (.NET).",
       'Contributed to SMART 3.0\'s initial build (Nest.js + Next.js) with a DevOps pipeline on AWS (ECS, S3, CI/CD).',
@@ -33,6 +37,7 @@ export const experience = [
     company: 'ArkRisk',
     role: 'Full Stack Developer specialized in AI',
     dateRange: 'Nov 2023 — Mar 2025 · New York, US (Remote, Part-time)',
+    start: '2023-11',
     bullets: [
       'Built a RAG system with memory and tool use (FastAPI, LangGraph, Ollama) integrating DeepSeek, Llama3, and Phi4, deployed on a GPU-backed AWS instance.',
       'Shipped production LLM solutions (Hugging Face Inference Endpoints, custom PyTorch models on EC2) combined with OCR for insurance-policy digitization.',
@@ -43,6 +48,7 @@ export const experience = [
     company: 'Impacto AI',
     role: 'Machine Learning Engineer',
     dateRange: 'May 2023 — Oct 2023 · Lima, PE (Remote)',
+    start: '2023-05',
     bullets: [
       'Led development of WhatsApp/Messenger/Instagram chatbots on GPT-based models, plus Computer Vision (OCR) and Speech Recognition models.',
       'Led Data Science projects using PySpark on AWS for large-scale data analysis and model development.',
@@ -53,6 +59,7 @@ export const experience = [
     company: 'AmauTeach Project',
     role: 'Full Stack Developer',
     dateRange: 'Jan 2022 — Dec 2022 · Lima, PE (Remote)',
+    start: '2022-01',
     bullets: [
       'Built AmauTeach Exam, an online testing platform with plagiarism-prevention ML (Vue, Flask, FastAPI, Node).',
       'Designed data-visualization systems to communicate insights to stakeholders.',
@@ -63,6 +70,7 @@ export const experience = [
     company: 'Chazki',
     role: 'Full Stack Developer',
     dateRange: 'Jul 2021 — Dec 2021 · Lima, PE (Remote)',
+    start: '2021-07',
     bullets: [
       'Built features for Chazki\'s logistics platform (web + mobile) using Vue, React Native, Node, and GCP.',
       'Contributed to a Spring Boot backend calculating minimum delivery routes with optimization algorithms in Java.',
@@ -73,6 +81,7 @@ export const experience = [
     company: 'MDP Consulting',
     role: 'Full Stack Developer and Data Scientist',
     dateRange: 'Oct 2020 — Jul 2021 · Lima, PE (Remote)',
+    start: '2020-10',
     bullets: [
       'Managed data pipelines and AI services on IBM Cloud to improve debt-collection management for banking clients.',
       'Built ML models on service-usage insights using pandas, scikit-learn, and Jupyter.',

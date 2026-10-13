@@ -84,5 +84,78 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   <body>
     <slot />
     {import.meta.env.DEV && <ThemeToggle />}
+
+    <script>
+      // Smooths wheel/trackpad scrolling and same-page anchor jumps. Touch
+      // keeps native scrolling, and reduced-motion users skip it entirely.
+      import Lenis from 'lenis';
+      import 'lenis/dist/lenis.css';
+
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const lenis = new Lenis({
+          duration: 1.15,
+          easing: t => 1 - Math.pow(1 - t, 4),
+          smoothWheel: true,
+          syncTouch: false,
+          anchors: { duration: 1.4 },
+        });
+        const loop = (time: number) => {
+          lenis.raf(time);
+          requestAnimationFrame(loop);
+        };
+        requestAnimationFrame(loop);
+      }
+    </script>
+
+    <script>
+      // Fades section content up the first time it scrolls into view.
+      // Targets are picked by selector so components don't need extra
+      // markup; carousel cards are skipped because they enter sideways.
+      const REVEAL_TARGETS = [
+        '.eyebrow',
+        '.section-title',
+        '.ct-h',
+        '.ct-text',
+        '.ct-grid',
+        '.card:not(.carousel .card)',
+        '.about__intro',
+        '.st',
+        '.small-projects__title',
+      ]
+        .map(selector => `main section:not(.hero) ${selector}`)
+        .join(', ');
+
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const targets = [...document.querySelectorAll<HTMLElement>(REVEAL_TARGETS)];
+
+        // Siblings revealed together cascade slightly instead of popping at once.
+        targets.forEach(el => {
+          const siblings = targets.filter(other => other.parentElement === el.parentElement);
+          el.style.setProperty('--rv-i', String(Math.min(siblings.indexOf(el), 4)));
+          el.classList.add('rv');
+        });
+
+        const observer = new IntersectionObserver(
+          entries => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-in');
+              observer.unobserve(entry.target);
+            }
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }
+        );
+
+        // Anything already on screen is shown immediately (no flash on load).
+        const viewport = window.innerHeight;
+        targets.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < viewport * 0.94 && rect.bottom > 0) el.classList.add('is-in');
+          else observer.observe(el);
+        });
+
+        document.documentElement.classList.add('rv-ready');
+      }
+    </script>
   </body>
 </html>

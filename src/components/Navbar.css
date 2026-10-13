@@ -29,18 +29,69 @@
 }
 
 .navbar__links--desktop {
+  position: relative;
   display: flex;
-  gap: 28px;
+  align-items: center;
+  gap: 6px;
 }
 
 .navbar__links--desktop a {
+  position: relative;
+  z-index: 1;
+  padding: 7px 12px;
+  border-radius: 999px;
   color: var(--color-text-muted);
   font-size: 0.95rem;
   font-weight: 600;
+  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.navbar__links--desktop a:hover {
+.navbar__links--desktop a:hover,
+.navbar__links--desktop a[aria-current='true'] {
   color: var(--color-text);
+}
+
+/* Pill that slides under the link of the section currently in view. */
+.navbar__indicator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 34px;
+  margin-top: -17px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    width 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+}
+
+.navbar__indicator.is-visible {
+  opacity: 1;
+}
+
+/* Reading progress along the very top edge of the viewport (the navbar is
+   sticky at top: 0, so its top edge is the viewport's). */
+.navbar__progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  height: 2px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__indicator {
+    transition: opacity 0.4s ease;
+  }
 }
 
 .navbar__mode-toggle {

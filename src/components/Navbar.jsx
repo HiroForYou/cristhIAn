@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './Navbar.css';
 
 const links = [
@@ -59,9 +59,60 @@ const ModeToggle = ({ mode, onToggle }) => (
   </button>
 );
 
+// Hash links that point at a section on the home page ("/#experience").
+const sectionIds = links.map(link => link.href.split('#')[1]).filter(Boolean);
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState('dark');
+  const [activeId, setActiveId] = useState(null);
+  const [indicator, setIndicator] = useState(null);
+  const progressRef = useRef(null);
+  const linksRef = useRef(null);
+
+  // Scroll progress bar + which section the reader is in. Both are read
+  // from one rAF-throttled scroll handler; the bar is written straight to
+  // the DOM so scrolling never re-renders the navbar.
+  useEffect(() => {
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+      }
+      const line = window.innerHeight * 0.4;
+      let current = null;
+      for (const id of sectionIds) {
+        const section = document.getElementById(id);
+        if (section && section.getBoundingClientRect().top <= line) current = id;
+      }
+      setActiveId(current);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
+  }, []);
+
+  // Slide the pill under the active link.
+  useEffect(() => {
+    const place = () => {
+      const link = activeId && linksRef.current?.querySelector(`a[href="/#${activeId}"]`);
+      setIndicator(link ? { left: link.offsetLeft, width: link.offsetWidth } : null);
+    };
+    place();
+    window.addEventListener('resize', place);
+    document.fonts?.ready.then(place);
+    return () => window.removeEventListener('resize', place);
+  }, [activeId]);
 
   useEffect(() => {
     setMode(document.documentElement.dataset.mode === 'light' ? 'light' : 'dark');
@@ -90,15 +141,25 @@ const Navbar = () => {
             <span>cristhIAn</span>
           </a>
 
-          <nav className="navbar__links navbar__links--desktop">
+          <nav className="navbar__links navbar__links--desktop" ref={linksRef}>
+            <span
+              className={`navbar__indicator${indicator ? ' is-visible' : ''}`}
+              aria-hidden="true"
+              style={indicator ? { transform: `translateX(${indicator.left}px)`, width: indicator.width } : undefined}
+            />
             {links.map(link => (
-              <a key={link.href} href={link.href}>
+              <a
+                key={link.href}
+                href={link.href}
+                aria-current={activeId && link.href === `/#${activeId}` ? 'true' : undefined}
+              >
                 {link.label}
               </a>
             ))}
             <ModeToggle mode={mode} onToggle={toggleMode} />
           </nav>
         </div>
+        <span className="navbar__progress" ref={progressRef} aria-hidden="true" />
       </header>
 
       {/* Rendered outside <header> on purpose: .navbar has backdrop-filter,
