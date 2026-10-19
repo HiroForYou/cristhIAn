@@ -8,12 +8,15 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  /** Blog posts pass their dates so the page is described as an article. */
+  article?: { publishedTime: Date; modifiedTime?: Date; tags?: string[] };
 }
 
 const {
   title = 'Cristhian Wiki — Machine Learning Engineer',
   description = 'Cristhian Wiki — Creative ML engineer who loves PyTorch and modern deep learning technologies.',
   image = '/images/social-banner.jpg',
+  article,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -31,11 +34,25 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    <meta property="og:type" content="website" />
+    <link rel="alternate" type="application/rss+xml" title="Cristhian Wiki — Blog" href="/rss.xml" />
+
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:site_name" content="Cristhian Wiki" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(image, Astro.site)} />
+    {article && (
+      <>
+        <meta property="article:published_time" content={article.publishedTime.toISOString()} />
+        <meta
+          property="article:modified_time"
+          content={(article.modifiedTime ?? article.publishedTime).toISOString()}
+        />
+        <meta property="article:author" content="Cristhian Wiki" />
+        {article.tags?.map(tag => <meta property="article:tag" content={tag} />)}
+      </>
+    )}
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />

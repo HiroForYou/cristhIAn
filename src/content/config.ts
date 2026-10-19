@@ -2,13 +2,18 @@ import { defineCollection, z } from 'astro:content';
 
 const blog = defineCollection({
   type: 'content',
-  schema: z.object({
-    title: z.string(),
-    date: z.coerce.date(),
-    author: z.string().default('Cristhian Wiki'),
-    tags: z.array(z.string()).default([]),
-    excerpt: z.string().optional(),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      date: z.coerce.date(),
+      // Set when a post is meaningfully revised; feeds dateModified for search engines.
+      updated: z.coerce.date().optional(),
+      author: z.string().default('Cristhian Wiki'),
+      tags: z.array(z.string()).default([]),
+      excerpt: z.string().optional(),
+      // Thumbnail for the blog index; usually one of the post's own images.
+      cover: image().optional(),
+    }),
 });
 
 const caseStudies = defineCollection({

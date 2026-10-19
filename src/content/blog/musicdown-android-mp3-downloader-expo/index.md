@@ -4,6 +4,7 @@ date: 2026-07-09
 author: Cristhian Wiki
 tags: ['expo', 'react-native', 'android', 'nodejs']
 excerpt: 'How I built MusicDown, an Expo/React Native app that turns a YouTube link into a tagged MP3 on your phone — plus the Android 14 permission bug that took the longest to figure out.'
+cover: ./images/architecture.svg
 ---
 
 I take the same commute most days, and it's the same story every time: signal drops the second
@@ -13,9 +14,9 @@ subscription wall, but with something dumb-simple: paste a link, get a real MP3 
 week I finally sat down and built it. It's called **MusicDown**, and it turned into a much better
 crash course on Android's media permissions than I expected.
 
-*Quick disclaimer before I get into it: this is a hobby project, built purely for my own private
-use — not a commercial product, and not an invitation to infringe anyone's copyright. If you build
-something similar, respect the artists and the platforms' terms of service.*
+> **Quick disclaimer:** this is a hobby project, built purely for my own private use — not a
+> commercial product, and not an invitation to infringe anyone's copyright. If you build something
+> similar, respect the artists and the platforms' terms of service.
 
 It's two small projects talking to each other: an Expo/React Native app on the phone, and a tiny
 Node server that does the actual audio conversion. Here's how it came together, screen by screen,
@@ -130,41 +131,28 @@ permission code (applied automatically via pnpm's `patchedDependencies`, so I do
 remember to reapply it) so it only asks for that permission when the app actually declares
 photo/video access — which mine never does.
 
-A few smaller ones came out of the same rabbit hole.
+### Smaller bites from the same rabbit hole
 
-### No album folders
-
-`createAlbumAsync` does raw filesystem I/O that needs a `WRITE_EXTERNAL_STORAGE` grant Android
-13+ won't hand out anymore. `createAssetAsync` alone uses the modern MediaStore insert path and
-drops the file straight into `Music/` without touching that wall, so I just stopped trying to
-group things into albums.
-
-### Write-only, on purpose
-
-The app only ever creates new assets, never reads the existing library through this permission, so
-it requests write-only access explicitly — which also sidesteps the granular "audio" read
-permission that Expo Go doesn't even declare in its manifest.
-
-### Deleting needs the newer API
-
-The legacy `deleteAssetsAsync()` doesn't implement Android 11's required user-consent flow — it
-can silently no-op instead of deleting anything. `expo-media-library/next`'s `Asset.delete()`
-properly triggers the real system confirmation dialog.
-
-### Why I need a real dev build, not Expo Go
-
-Reading the whole Music folder needs `READ_MEDIA_AUDIO`, which Expo Go's fixed manifest can't
-carry — only a custom development client, built with EAS, actually ships the native permissions my
-config plugins add. That's why both my dev and preview EAS profiles build a plain APK for
-sideloading, rather than the Play-Store AAB format.
-
-### A broken enum
-
-`browser-id3-writer` declares its `ImageType` as a TypeScript `const enum`, which gets erased at
-compile time — but the published package ships plain JS with no runtime export for it, so
-`ImageType.CoverFront` is quietly `undefined`. I just hardcoded the raw APIC picture-type byte
-(`0x03`) instead, wrapped in a try/catch so one bad YouTube thumbnail can't take down an entire
-download.
+- **No album folders.** `createAlbumAsync` does raw filesystem I/O that needs a
+  `WRITE_EXTERNAL_STORAGE` grant Android 13+ won't hand out anymore. `createAssetAsync` alone uses
+  the modern MediaStore insert path and drops the file straight into `Music/` without touching that
+  wall, so I just stopped trying to group things into albums.
+- **Write-only, on purpose.** The app only ever creates new assets, never reads the existing
+  library through this permission, so it requests write-only access explicitly — which also
+  sidesteps the granular "audio" read permission that Expo Go doesn't even declare in its manifest.
+- **Deleting needs the newer API.** The legacy `deleteAssetsAsync()` doesn't implement Android
+  11's required user-consent flow — it can silently no-op instead of deleting anything.
+  `expo-media-library/next`'s `Asset.delete()` properly triggers the real system confirmation
+  dialog.
+- **Expo Go isn't enough.** Reading the whole Music folder needs `READ_MEDIA_AUDIO`, which Expo
+  Go's fixed manifest can't carry — only a custom development client, built with EAS, actually
+  ships the native permissions my config plugins add. That's why both my dev and preview EAS
+  profiles build a plain APK for sideloading, rather than the Play-Store AAB format.
+- **A broken enum.** `browser-id3-writer` declares its `ImageType` as a TypeScript `const enum`,
+  which gets erased at compile time — but the published package ships plain JS with no runtime
+  export for it, so `ImageType.CoverFront` is quietly `undefined`. I just hardcoded the raw APIC
+  picture-type byte (`0x03`) instead, wrapped in a try/catch so one bad YouTube thumbnail can't
+  take down an entire download.
 
 ## Where it's at
 

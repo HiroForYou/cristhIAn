@@ -1,9 +1,11 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
 import { getCollection } from 'astro:content';
 import { slugify } from '@/utils/slugify.js';
+import { readingTime } from '@/utils/readingTime.js';
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -21,7 +23,10 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'short',
   day: 'numeric',
+  timeZone: 'UTC',
 });
+
+const [featured] = posts;
 ---
 
 <Layout
@@ -31,74 +36,103 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   <Navbar client:load />
   <main>
     <section class="container blog-index">
-      <p class="eyebrow">Writing</p>
-      <h1>Blog</h1>
+      <header class="blog-hero">
+        <p class="eyebrow">Writing</p>
+        <h1 class="blog-hero__title">Notes from the <em>workbench.</em></h1>
+        <p class="blog-hero__intro">
+          Machine learning, side projects, and the bugs that taught me the most. Long-form write-ups
+          of things I built, broke, and eventually understood.
+        </p>
+        <a class="blog-hero__rss" href="/rss.xml">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9" /><path d="M4 4a16 16 0 0 1 16 16" /><circle cx="5" cy="19" r="1" /></svg>
+          Subscribe via RSS
+        </a>
+      </header>
 
-      <label class="blog-search" for="blog-search-input">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
-        </svg>
-        <input
-          type="text"
-          id="blog-search-input"
-          placeholder="Search posts or tags…"
-          autocomplete="off"
-        />
-      </label>
+      {
+        featured && (
+          <a class="featured" href={`/blog/${featured.slug}/`} id="blog-featured">
+            {featured.data.cover && (
+              <div class="featured__media">
+                <Image
+                  src={featured.data.cover}
+                  alt=""
+                  widths={[480, 800, 1100]}
+                  sizes="(max-width: 860px) 100vw, 560px"
+                  loading="eager"
+                />
+              </div>
+            )}
+            <div class="featured__body">
+              <span class="featured__badge">Latest</span>
+              <h2 class="featured__title">{featured.data.title}</h2>
+              {featured.data.excerpt && <p class="featured__excerpt">{featured.data.excerpt}</p>}
+              <p class="post-meta">
+                {dateFormatter.format(featured.data.date)} · {readingTime(featured.body)} min read
+              </p>
+              <span class="featured__cta">
+                Read the post
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </span>
+            </div>
+          </a>
+        )
+      }
 
-      <div class="blog-controls">
+      <div class="blog-toolbar">
         <div class="blog-controls__tags" id="blog-tag-filter">
-          <button type="button" class="tag is-active" data-tag="all">All</button>
+          <button type="button" class="chip is-active" data-tag="all">All</button>
           {
             visibleTags.map(tag => (
-              <button type="button" class="tag" data-tag={slugify(tag)}>
+              <button type="button" class="chip" data-tag={slugify(tag)}>
                 {tag}
               </button>
             ))
           }
           {
             overflowTags.map(tag => (
-              <button type="button" class="tag" data-tag={slugify(tag)} data-overflow-tag hidden>
+              <button type="button" class="chip" data-tag={slugify(tag)} data-overflow-tag hidden>
                 {tag}
               </button>
             ))
           }
           {
             overflowTags.length > 0 && (
-              <button type="button" class="tag blog-controls__more" id="blog-tags-more">
+              <button type="button" class="chip blog-controls__more" id="blog-tags-more">
                 +{overflowTags.length} more
               </button>
             )
           }
         </div>
 
-        <div class="blog-controls__sort" id="blog-sort">
-          <button type="button" class="btn btn-secondary is-active" data-sort="desc">
-            Newest first
-          </button>
-          <button type="button" class="btn btn-secondary" data-sort="asc">
-            Oldest first
-          </button>
-        </div>
+        <label class="blog-search" for="blog-search-input">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <input type="search" id="blog-search-input" placeholder="Search posts…" autocomplete="off" />
+        </label>
       </div>
 
-      <ul class="blog-index__list" id="blog-post-list">
+      <ul class="post-list" id="blog-post-list">
         {
-          posts.map(post => (
+          posts.map((post, i) => (
             <li
+              class="post-row"
+              data-featured={i === 0 ? '' : undefined}
               data-tags={post.data.tags.map(slugify).join(',')}
-              data-date={post.data.date.toISOString()}
-              data-search={`${post.data.title} ${post.data.tags.join(' ')}`.toLowerCase()}
+              data-search={`${post.data.title} ${post.data.excerpt ?? ''} ${post.data.tags.join(' ')}`.toLowerCase()}
             >
-              <div class="card blog-index__card">
-                <span class="blog-index__date">{dateFormatter.format(post.data.date)}</span>
-                <h2>
-                  <a class="blog-index__title-link" href={`/blog/${post.slug}/`}>
-                    {post.data.title}
-                  </a>
+              <time class="post-row__date" datetime={post.data.date.toISOString()}>
+                {dateFormatter.format(post.data.date)}
+              </time>
+              <div class="post-row__body">
+                <h2 class="post-row__title">
+                  <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
                 </h2>
-                <div class="blog-index__tags">
+                {post.data.excerpt && <p class="post-row__excerpt">{post.data.excerpt}</p>}
+                <div class="post-row__foot">
+                  <span class="post-meta">{readingTime(post.body)} min read</span>
                   {post.data.tags.map(tag => (
                     <a class="tag" href={`/blog?tag=${slugify(tag)}`}>
                       {tag}
@@ -106,13 +140,18 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
                   ))}
                 </div>
               </div>
+              {post.data.cover && (
+                <div class="post-row__thumb">
+                  <Image src={post.data.cover} alt="" width={400} />
+                </div>
+              )}
             </li>
           ))
         }
       </ul>
 
       <p class="blog-index__empty" id="blog-empty" hidden>
-        No posts match this filter.
+        Nothing matches that yet. Try another tag or a broader search.
       </p>
     </section>
   </main>
@@ -124,15 +163,206 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     padding-top: 64px;
   }
 
+  /* ---------- Hero ---------- */
+
+  .blog-hero {
+    max-width: 760px;
+    margin-bottom: 56px;
+  }
+
+  .blog-hero__title {
+    font-size: clamp(2.6rem, 6.5vw, 4.75rem);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    margin-bottom: 20px;
+  }
+
+  .blog-hero__intro {
+    font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    max-width: 58ch;
+    margin: 0;
+  }
+
+  .blog-hero__rss {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+
+  .blog-hero__rss:hover {
+    color: var(--color-primary-light);
+  }
+
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  /* ---------- Featured ---------- */
+
+  .featured {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--color-surface);
+    color: var(--color-text);
+    transition:
+      border-color 0.25s ease,
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .featured[hidden] {
+    display: none;
+  }
+
+  .featured:hover {
+    color: var(--color-text);
+    border-color: var(--color-primary-light);
+    transform: translateY(-3px);
+    box-shadow: 0 28px 60px -32px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  }
+
+  .featured__media {
+    position: relative;
+    min-height: 300px;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+
+  .featured__media :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left top;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .featured:hover .featured__media :global(img) {
+    transform: scale(1.03);
+  }
+
+  .featured__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: clamp(24px, 4vw, 44px);
+  }
+
+  .featured__badge {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: #fff;
+    background: var(--gradient-primary, var(--color-primary));
+  }
+
+  .featured__title {
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .featured__excerpt {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .featured__cta {
+    margin-top: auto;
+    padding-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--color-primary-light);
+  }
+
+  .featured__cta svg {
+    transition: transform 0.2s ease;
+  }
+
+  .featured:hover .featured__cta svg {
+    transform: translateX(4px);
+  }
+
+  /* ---------- Toolbar ---------- */
+
+  .blog-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 72px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .blog-controls__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-muted);
+    transition:
+      color 0.15s ease,
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .chip:hover {
+    color: var(--color-text);
+    border-color: var(--color-border);
+  }
+
+  .chip.is-active {
+    color: var(--color-text);
+    background: var(--color-tag-bg);
+    border-color: var(--color-tag-border);
+  }
+
+  .blog-controls__more {
+    border-style: dashed;
+    border-color: var(--color-border);
+  }
+
   .blog-search {
     display: flex;
     align-items: center;
     gap: 10px;
-    max-width: 360px;
-    margin-top: 32px;
-    padding: 10px 14px;
+    width: min(100%, 260px);
+    padding: 8px 14px;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-card);
+    border-radius: 999px;
     color: var(--color-text-muted);
     transition: border-color 0.15s ease;
   }
@@ -151,7 +381,8 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     border: none;
     background: none;
     color: var(--color-text);
-    font-size: 0.9rem;
+    font: inherit;
+    font-size: 0.875rem;
   }
 
   .blog-search input:focus {
@@ -162,119 +393,170 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     color: var(--color-text-muted);
   }
 
-  .blog-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: 32px;
-  }
+  /* ---------- List ---------- */
 
-  .blog-controls__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .blog-controls__tags .tag {
-    cursor: pointer;
-    border: 1px solid var(--color-tag-border);
-    background: transparent;
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
-  }
-
-  .blog-controls__tags .tag.is-active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #fff;
-  }
-
-  .blog-controls__more {
-    border-style: dashed;
-  }
-
-  .blog-controls__sort {
-    display: flex;
-    gap: 8px;
-  }
-
-  .blog-controls__sort .btn {
-    padding: 6px 14px;
-    font-size: 0.8rem;
-  }
-
-  .blog-controls__sort .btn.is-active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #fff;
-  }
-
-  .blog-index__list {
+  .post-list {
     list-style: none;
-    margin: 24px 0 0;
+    margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
   }
 
-  .blog-index__card {
+  /* The newest post already has the featured card; it only joins the list
+     while a filter or search is active. */
+  .post-list:not(.is-filtering) .post-row[data-featured] {
+    display: none;
+  }
+
+  .post-row {
     position: relative;
-    transition: border-color 0.15s ease;
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr) 200px;
+    gap: 32px;
+    align-items: start;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--color-border);
   }
 
-  .blog-index__card:hover {
-    border-color: var(--color-primary-light);
+  .post-row[hidden] {
+    display: none;
   }
 
-  .blog-index__title-link {
+  .post-row__date {
+    padding-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-row__title {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .post-row__title a {
     color: var(--color-text);
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
+    background-size: 0 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .blog-index__title-link::after {
+  /* The whole row is clickable through the title link. */
+  .post-row__title a::after {
     content: '';
     position: absolute;
     inset: 0;
   }
 
-  .blog-index__list h2 {
-    font-size: 1.25rem;
-    margin: 8px 0;
+  .post-row:hover .post-row__title a {
+    background-size: 100% 2px;
   }
 
-  .blog-index__date {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
+  .post-row__excerpt {
     color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 16px;
+    max-width: 62ch;
   }
 
-  .blog-index__tags {
+  .post-row__foot {
     position: relative;
     z-index: 1;
     display: flex;
-    gap: 8px;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+  }
+
+  .post-row__foot .post-meta {
+    margin-right: 6px;
+  }
+
+  .post-row__thumb {
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .post-row__thumb :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left top;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .post-row:hover .post-row__thumb :global(img) {
+    transform: scale(1.04);
   }
 
   .blog-index__empty {
     color: var(--color-text-muted);
-    margin-top: 24px;
+    padding: 48px 0;
+    text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    .featured {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .featured__media {
+      min-height: 0;
+      aspect-ratio: 16 / 9;
+    }
+
+    .post-row {
+      grid-template-columns: minmax(0, 1fr) 140px;
+      gap: 8px 24px;
+    }
+
+    .post-row__date {
+      grid-column: 1 / -1;
+      padding-top: 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .blog-index {
+      padding-top: 32px;
+    }
+
+    .blog-toolbar {
+      margin-top: 48px;
+    }
+
+    .blog-search {
+      width: 100%;
+    }
+
+    .post-row {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 28px 0;
+    }
+
+    .post-row__thumb {
+      display: none;
+    }
   }
 </style>
 
 <script>
   const list = document.getElementById('blog-post-list');
-  const items = Array.from(list?.children ?? []);
+  const items = Array.from(list?.children ?? []) as HTMLElement[];
   const emptyMessage = document.getElementById('blog-empty');
+  const featured = document.getElementById('blog-featured');
 
-  const tagButtons = Array.from(document.querySelectorAll('#blog-tag-filter [data-tag]'));
-  const sortButtons = Array.from(document.querySelectorAll('#blog-sort [data-sort]'));
-  const searchInput = document.getElementById('blog-search-input');
+  const tagButtons = Array.from(document.querySelectorAll<HTMLElement>('#blog-tag-filter [data-tag]'));
+  const searchInput = document.getElementById('blog-search-input') as HTMLInputElement | null;
 
   let activeTag = 'all';
-  let activeSort = 'desc';
   let searchQuery = '';
 
   function applyFilter() {
@@ -288,22 +570,18 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
       if (visible) visibleCount++;
     });
     if (emptyMessage) emptyMessage.hidden = visibleCount > 0;
+
+    // While filtering, the featured card steps aside and the newest post
+    // shows up in the list like any other result.
+    const filtering = activeTag !== 'all' || searchQuery !== '';
+    list?.classList.toggle('is-filtering', filtering);
+    if (featured) featured.hidden = filtering;
   }
 
   searchInput?.addEventListener('input', () => {
     searchQuery = searchInput.value.trim().toLowerCase();
     applyFilter();
   });
-
-  function applySort() {
-    if (!list) return;
-    const sorted = [...items].sort((a, b) => {
-      const dateA = new Date(a.getAttribute('data-date') ?? 0).getTime();
-      const dateB = new Date(b.getAttribute('data-date') ?? 0).getTime();
-      return activeSort === 'asc' ? dateA - dateB : dateB - dateA;
-    });
-    sorted.forEach(item => list.appendChild(item));
-  }
 
   tagButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -313,16 +591,8 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     });
   });
 
-  sortButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      activeSort = button.getAttribute('data-sort') ?? 'desc';
-      sortButtons.forEach(b => b.classList.toggle('is-active', b === button));
-      applySort();
-    });
-  });
-
   const moreButton = document.getElementById('blog-tags-more');
-  const overflowTagButtons = Array.from(document.querySelectorAll('[data-overflow-tag]'));
+  const overflowTagButtons = Array.from(document.querySelectorAll<HTMLElement>('[data-overflow-tag]'));
   const moreLabel = moreButton?.textContent?.trim() ?? '';
 
   moreButton?.addEventListener('click', () => {

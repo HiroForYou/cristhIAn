@@ -340,3 +340,8 @@
     transition: none;
   }
 }
+
+/* Current page in the mobile menu. */
+.navbar-overlay__list a[aria-current='true'] {
+  color: var(--color-primary);
+}

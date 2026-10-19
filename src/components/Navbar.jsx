@@ -62,6 +62,15 @@ const ModeToggle = ({ mode, onToggle }) => (
 // Hash links that point at a section on the home page ("/#experience").
 const sectionIds = links.map(link => link.href.split('#')[1]).filter(Boolean);
 
+// Pages outside the home page highlight the link they belong to: the blog
+// and its posts light up "Blog", case studies belong under "Projects".
+const routeLinks = [
+  { prefix: '/blog', href: '/blog' },
+  { prefix: '/case-studies', href: '/#projects' },
+];
+const linkForPath = path =>
+  routeLinks.find(({ prefix }) => path === prefix || path.startsWith(`${prefix}/`))?.href ?? null;
+
 // Lenis is mounted in Layout.astro; pause it while the menu overlay is open
 // so wheel input can't scroll the page underneath.
 const setPageScrollLocked = locked => {
@@ -75,6 +84,7 @@ const Navbar = () => {
   const [mode, setMode] = useState('dark');
   const [scrolled, setScrolled] = useState(false);
   const [activeId, setActiveId] = useState(null);
+  const [routeHref, setRouteHref] = useState(null);
   const progressRef = useRef(null);
   const pillRef = useRef(null);
   const indicatorRef = useRef(null);
@@ -83,7 +93,11 @@ const Navbar = () => {
 
   useEffect(() => {
     setMode(document.documentElement.dataset.mode === 'light' ? 'light' : 'dark');
+    setRouteHref(linkForPath(window.location.pathname));
   }, []);
+
+  // A home-page section in view wins; otherwise fall back to the page's own link.
+  const activeHref = activeId ? `/#${activeId}` : routeHref;
 
   // Scrolled state, progress bar and active section, all from one
   // rAF-throttled scroll handler. The bar is written straight to the DOM.
@@ -118,26 +132,38 @@ const Navbar = () => {
     };
   }, []);
 
-  // Slide the solid indicator under the active link.
-  const placeIndicator = useCallback(() => {
-    const pill = pillRef.current;
-    const indicator = indicatorRef.current;
-    if (!pill || !indicator) return;
-    const link = activeId && pill.querySelector(`a[href="/#${activeId}"]`);
-    if (!link) {
-      indicator.style.opacity = '0';
-      return;
-    }
-    indicator.style.opacity = '1';
-    indicator.style.width = `${link.offsetWidth}px`;
-    indicator.style.transform = `translateX(${link.offsetLeft}px)`;
-  }, [activeId]);
+  // Slide the solid indicator under the active link. It only slides when
+  // the active link changes; appearing on page load, re-measuring once the
+  // web fonts load, and window resizes all move it in place without a slide.
+  const placeIndicator = useCallback(
+    (instant = false) => {
+      const pill = pillRef.current;
+      const indicator = indicatorRef.current;
+      if (!pill || !indicator) return;
+      const link = activeHref && pill.querySelector(`a[href="${activeHref}"]`);
+      if (!link) {
+        indicator.style.opacity = '0';
+        return;
+      }
+      const jump = instant || indicator.style.opacity !== '1';
+      if (jump) indicator.style.transition = 'opacity 0.4s var(--nav-ease)';
+      indicator.style.width = `${link.offsetWidth}px`;
+      indicator.style.transform = `translateX(${link.offsetLeft}px)`;
+      if (jump) {
+        indicator.getBoundingClientRect(); // commit the position before re-enabling the slide
+        indicator.style.transition = '';
+      }
+      indicator.style.opacity = '1';
+    },
+    [activeHref]
+  );
 
-  useLayoutEffect(placeIndicator, [placeIndicator]);
+  useLayoutEffect(() => placeIndicator(), [placeIndicator]);
   useEffect(() => {
-    window.addEventListener('resize', placeIndicator);
-    document.fonts?.ready.then(placeIndicator);
-    return () => window.removeEventListener('resize', placeIndicator);
+    const placeInstantly = () => placeIndicator(true);
+    window.addEventListener('resize', placeInstantly);
+    document.fonts?.ready.then(placeInstantly);
+    return () => window.removeEventListener('resize', placeInstantly);
   }, [placeIndicator]);
 
   // Mobile overlay: lock page scroll, close on Esc, move focus in and back.
@@ -186,7 +212,7 @@ const Navbar = () => {
                   key={link.href}
                   href={link.href}
                   className="navbar__link"
-                  aria-current={activeId && link.href === `/#${activeId}` ? 'true' : undefined}
+                  aria-current={link.href === activeHref ? 'true' : undefined}
                 >
                   {link.label}
                 </a>
@@ -230,6 +256,7 @@ const Navbar = () => {
                 ref={i === 0 ? firstOverlayLinkRef : undefined}
                 href={link.href}
                 style={{ '--i': i }}
+                aria-current={link.href === activeHref ? 'true' : undefined}
                 onClick={() => setIsOpen(false)}
               >
                 <small>{String(i + 1).padStart(2, '0')}</small>

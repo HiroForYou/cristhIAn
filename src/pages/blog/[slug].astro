@@ -1,112 +1,234 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
 import { getCollection, render } from 'astro:content';
+import avatar from '@/assets/avatar-photo.jpg';
 import { slugify } from '@/utils/slugify.js';
 import { readingTime } from '@/utils/readingTime.js';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
-  return posts.map(post => ({
+  const posts = (await getCollection('blog')).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  );
+  return posts.map((post, i) => ({
     params: { slug: post.slug },
-    props: { post },
+    // The list is newest first, so the "newer" neighbour sits at i - 1.
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
   }));
 }
 
-const { post } = Astro.props;
-const { Content } = await render(post);
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
 
+const toc = headings.filter(h => h.depth === 2 || h.depth === 3);
 const minutes = readingTime(post.body);
 const postUrl = new URL(Astro.url.pathname, Astro.site).toString();
 const shareLinks = {
-  facebook: `https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`,
-  twitter: `https://twitter.com/share?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(postUrl)}`,
+  x: `https://x.com/intent/post?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(postUrl)}`,
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`,
   reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(post.data.title)}`,
 };
 const githubEditUrl = `https://github.com/HiroForYou/cristhIAn/tree/astro-migration/src/content/blog/${post.slug}/index.md`;
 
+// Frontmatter dates are parsed as UTC midnight; formatting them in the
+// build machine's local zone would shift them a day back.
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
-  month: 'short',
+  month: 'long',
   day: 'numeric',
+  timeZone: 'UTC',
 });
+const shortDate = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+});
+
+// Posts with a cover get a rasterized 1200x630 card from ./[slug]/og.png.ts.
+const ogImage = post.data.cover ? `/blog/${post.slug}/og.png` : undefined;
+const ogImageUrl = new URL(ogImage ?? '/images/social-banner.jpg', Astro.site).toString();
+const modified = post.data.updated ?? post.data.date;
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  '@id': `${postUrl}#article`,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+  headline: post.data.title,
+  description: post.data.excerpt,
+  image: [ogImageUrl],
+  datePublished: post.data.date.toISOString(),
+  dateModified: modified.toISOString(),
+  author: { '@id': 'https://www.cristhianwiki.com/#person' },
+  publisher: { '@id': 'https://www.cristhianwiki.com/#person' },
+  isPartOf: { '@id': 'https://www.cristhianwiki.com/#website' },
+  url: postUrl,
+  inLanguage: 'en',
+  keywords: post.data.tags.join(', '),
+  wordCount: post.body.trim().split(/\s+/).length,
+  timeRequired: `PT${minutes}M`,
+};
+
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.cristhianwiki.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.cristhianwiki.com/blog/' },
+    { '@type': 'ListItem', position: 3, name: post.data.title, item: postUrl },
+  ],
+};
 ---
 
-<Layout title={`${post.data.title} — Cristhian Wiki`} description={post.data.excerpt}>
-  <script type="application/ld+json" is:inline set:html={JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.data.title,
-    description: post.data.excerpt,
-    datePublished: post.data.date.toISOString(),
-    author: { '@type': 'Person', name: post.data.author, url: 'https://www.cristhianwiki.com' },
-    url: postUrl,
-    keywords: post.data.tags.join(', '),
-  })} />
+<Layout
+  title={`${post.data.title} — Cristhian Wiki`}
+  description={post.data.excerpt}
+  image={ogImage}
+  article={{ publishedTime: post.data.date, modifiedTime: modified, tags: post.data.tags }}
+>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbs)} />
 
   <Navbar client:load />
   <main>
-    <div class="container post-layout">
-      <article class="post">
-        <a class="post__back" href="/blog">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
-          </svg>
-          Back to blog
-        </a>
-        <p class="post__meta">
-          {dateFormatter.format(post.data.date)} · {minutes} min read
-        </p>
-        <h1>{post.data.title}</h1>
+    <article class="container post">
+      <header class="post-head">
+        <nav class="post-head__crumbs" aria-label="Breadcrumb">
+          <a href="/blog">Blog</a>
+          {post.data.tags[0] && (
+            <>
+              <span aria-hidden="true">/</span>
+              <a href={`/blog?tag=${slugify(post.data.tags[0])}`}>{post.data.tags[0]}</a>
+            </>
+          )}
+        </nav>
 
+        <h1 class="post-head__title">{post.data.title}</h1>
+        {post.data.excerpt && <p class="post-head__dek">{post.data.excerpt}</p>}
+
+        <div class="post-head__byline">
+          <Image class="post-head__avatar" src={avatar} alt="" width={88} height={88} />
+          <div>
+            <span class="post-head__author">{post.data.author}</span>
+            <span class="post-head__meta">
+              <time datetime={post.data.date.toISOString()}>{dateFormatter.format(post.data.date)}</time>
+              <span aria-hidden="true">·</span>
+              {minutes} min read
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="post-body">
         <div class="post__content">
-          <Content />
+          {toc.length > 2 && (
+            <details class="toc-mobile">
+              <summary>On this page</summary>
+              <ol>
+                {toc.map(h => (
+                  <li class={`toc__item toc__item--h${h.depth}`}>
+                    <a href={`#${h.slug}`}>{h.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
+
+          <div class="prose">
+            <Content />
+          </div>
+
+          <footer class="post-end">
+            <div class="post-end__tags">
+              {post.data.tags.map(tag => (
+                <a class="tag" href={`/blog?tag=${slugify(tag)}`}>#{tag}</a>
+              ))}
+            </div>
+
+            <div class="author-card">
+              <Image class="author-card__avatar" src={avatar} alt="Cristhian Wiki" width={128} height={128} />
+              <div>
+                <p class="author-card__label">Written by</p>
+                <p class="author-card__name">Cristhian Wiki</p>
+                <p class="author-card__bio">
+                  Senior Machine Learning Engineer. I write about the models I build, the bugs that
+                  cost me a weekend, and whatever I am currently learning the hard way.
+                </p>
+                <div class="author-card__links">
+                  <a href="https://github.com/HiroForYou" target="_blank" rel="noopener noreferrer">GitHub</a>
+                  <a href="https://www.linkedin.com/in/cristhian-wiki/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                  <a href="/#contact">Get in touch</a>
+                </div>
+              </div>
+            </div>
+
+            {(newer || older) && (
+              <nav class="post-nav" aria-label="More posts">
+                {older ? (
+                  <a class="post-nav__link" href={`/blog/${older.slug}/`}>
+                    <span class="post-nav__dir">← Previous</span>
+                    <span class="post-nav__title">{older.data.title}</span>
+                    <span class="post-nav__date">{shortDate.format(older.data.date)}</span>
+                  </a>
+                ) : <span />}
+                {newer && (
+                  <a class="post-nav__link post-nav__link--next" href={`/blog/${newer.slug}/`}>
+                    <span class="post-nav__dir">Next →</span>
+                    <span class="post-nav__title">{newer.data.title}</span>
+                    <span class="post-nav__date">{shortDate.format(newer.data.date)}</span>
+                  </a>
+                )}
+              </nav>
+            )}
+
+            <a class="post-end__edit" href={githubEditUrl} target="_blank" rel="noopener noreferrer">
+              Spotted a typo? Edit this post on GitHub ↗
+            </a>
+          </footer>
+
+          <section class="post__comments" aria-label="Comments">
+            <h2 class="post__comments-title">Comments</h2>
+            <div id="disqus_thread"></div>
+          </section>
         </div>
 
-        <div id="disqus_thread" class="post__comments"></div>
-      </article>
+        <aside class="post-aside">
+          {toc.length > 2 && (
+            <nav class="toc" aria-label="On this page">
+              <p class="post-aside__label">On this page</p>
+              <ol>
+                {toc.map(h => (
+                  <li class={`toc__item toc__item--h${h.depth}`}>
+                    <a href={`#${h.slug}`} data-toc-link={h.slug}>{h.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
 
-      <aside class="post-sidebar">
-        <section class="post-sidebar__section">
-          <h2>Tags</h2>
-          <div class="post-sidebar__tags">
-            {
-              post.data.tags.map(tag => (
-                <a class="tag" href={`/blog?tag=${slugify(tag)}`}>
-                  {tag}
-                </a>
-              ))
-            }
+          <div class="share">
+            <p class="post-aside__label">Share</p>
+            <div class="share__row">
+              <a href={shareLinks.x} target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.75 3h3.07l-6.71 7.67L22 21h-6.18l-4.84-6.33L5.44 21H2.37l7.18-8.2L2 3h6.33l4.38 5.79L17.75 3Zm-1.08 16.18h1.7L7.4 4.73H5.58l11.09 14.45Z" /></svg>
+              </a>
+              <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.83v1.54h.06c.53-1 1.84-2.06 3.78-2.06 4.05 0 4.8 2.66 4.8 6.12V21h-4v-4.98c0-1.19-.02-2.72-1.66-2.72-1.66 0-1.91 1.3-1.91 2.63V21h-4V9.75Z" /></svg>
+              </a>
+              <a href={shareLinks.reddit} target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.3a2.2 2.2 0 0 0-3.7-1.6 10.7 10.7 0 0 0-5.6-1.7l1-4.5 3.2.7a1.5 1.5 0 1 0 .2-.9l-3.6-.8a.5.5 0 0 0-.6.4l-1.1 5a10.7 10.7 0 0 0-5.7 1.7A2.2 2.2 0 0 0 2 12.3c0 .8.4 1.5 1 1.9v.4c0 3 3.5 5.4 7.9 5.4s7.9-2.4 7.9-5.4v-.4c.6-.4 1.2-1.1 1.2-1.9ZM8 13.6a1.2 1.2 0 1 1 2.4 0 1.2 1.2 0 0 1-2.4 0Zm7.6 3a5.9 5.9 0 0 1-3.6 1c-1.3 0-2.6-.3-3.6-1a.4.4 0 0 1 .5-.6c.9.6 2 .9 3.1.9s2.2-.3 3.1-.9a.4.4 0 0 1 .5.6Zm-.3-1.8a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z" /></svg>
+              </a>
+              <button type="button" class="share__copy" data-copy-url={postUrl} aria-label="Copy link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5" /><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" /></svg>
+                <span class="share__copied" aria-live="polite"></span>
+              </button>
+            </div>
           </div>
-        </section>
-
-        <section class="post-sidebar__section">
-          <h2>Share on</h2>
-          <div class="post-sidebar__share">
-            <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M13.5 21v-7.5H16l.5-3h-3V8.2c0-.87.24-1.46 1.5-1.46H16.6V4.14C16.3 4.1 15.3 4 14.1 4c-2.4 0-4 1.47-4 4.16V10.5H7.6v3H10V21h3.5Z"></path>
-              </svg>
-            </a>
-            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.7 11.7 0 0 1 3.4 4.6a4.1 4.1 0 0 0 1.3 5.5c-.6 0-1.2-.2-1.8-.5v.1c0 2 1.4 3.6 3.3 4a4.2 4.2 0 0 1-1.9.1 4.1 4.1 0 0 0 3.9 2.9A8.3 8.3 0 0 1 2 18.6a11.7 11.7 0 0 0 6.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1Z"></path>
-              </svg>
-            </a>
-            <a href={shareLinks.reddit} target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22 12.3a2.2 2.2 0 0 0-3.7-1.6 10.7 10.7 0 0 0-5.6-1.7l1-4.5 3.2.7a1.5 1.5 0 1 0 .2-.9l-3.6-.8a.5.5 0 0 0-.6.4l-1.1 5a10.7 10.7 0 0 0-5.7 1.7A2.2 2.2 0 0 0 2 12.3c0 .8.4 1.5 1 1.9v.4c0 3 3.5 5.4 7.9 5.4s7.9-2.4 7.9-5.4v-.4c.6-.4 1.2-1.1 1.2-1.9ZM8 13.6a1.2 1.2 0 1 1 2.4 0 1.2 1.2 0 0 1-2.4 0Zm7.6 3a5.9 5.9 0 0 1-3.6 1c-1.3 0-2.6-.3-3.6-1a.4.4 0 0 1 .5-.6c.9.6 2 .9 3.1.9s2.2-.3 3.1-.9a.4.4 0 0 1 .5.6Zm-.3-1.8a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z"></path>
-              </svg>
-            </a>
-          </div>
-        </section>
-
-        <a class="post-sidebar__github" href={githubEditUrl} target="_blank" rel="noopener noreferrer">
-          Edit post on GitHub
-        </a>
-      </aside>
-    </div>
+        </aside>
+      </div>
+    </article>
   </main>
 
   <button id="back-to-top" class="back-to-top" aria-label="Back to top" type="button">
@@ -139,6 +261,84 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   });
 </script>
 
+<script>
+  // Table of contents: highlight the section currently being read. The
+  // active heading is the last one whose top has passed a line a bit
+  // below the navbar.
+  const tocLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
+  const tocHeadings = tocLinks
+    .map(link => document.getElementById(link.dataset.tocLink ?? ''))
+    .filter((el): el is HTMLElement => el !== null);
+
+  const updateToc = () => {
+    const line = window.innerHeight * 0.25;
+    let active = tocHeadings[0];
+    for (const heading of tocHeadings) {
+      if (heading.getBoundingClientRect().top <= line) active = heading;
+      else break;
+    }
+    tocLinks.forEach(link => link.classList.toggle('is-active', link.dataset.tocLink === active?.id));
+  };
+
+  if (tocLinks.length) {
+    updateToc();
+    window.addEventListener('scroll', updateToc, { passive: true });
+  }
+
+  // Hover anchors on headings, so any section can be linked directly.
+  document.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]').forEach(heading => {
+    const anchor = document.createElement('a');
+    anchor.href = `#${heading.id}`;
+    anchor.className = 'heading-anchor';
+    anchor.setAttribute('aria-label', `Link to “${heading.textContent}”`);
+    anchor.textContent = '#';
+    heading.appendChild(anchor);
+  });
+
+  // Code blocks: language label and a copy button.
+  document.querySelectorAll<HTMLPreElement>('.prose pre.astro-code').forEach(pre => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block';
+    pre.replaceWith(wrapper);
+    wrapper.appendChild(pre);
+
+    const bar = document.createElement('div');
+    bar.className = 'code-block__bar';
+    const lang = pre.dataset.language;
+    bar.innerHTML = `<span>${lang && lang !== 'plaintext' ? lang : ''}</span>`;
+
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'code-block__copy';
+    copy.textContent = 'Copy';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        copy.textContent = 'Copied';
+      } catch {
+        copy.textContent = 'Failed';
+      }
+      setTimeout(() => (copy.textContent = 'Copy'), 1600);
+    });
+    bar.appendChild(copy);
+    wrapper.prepend(bar);
+  });
+
+  // Share: copy the post URL.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-url]').forEach(button => {
+    const label = button.querySelector('.share__copied');
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyUrl ?? location.href);
+        if (label) label.textContent = 'Link copied';
+      } catch {
+        if (label) label.textContent = 'Copy failed';
+      }
+      setTimeout(() => label && (label.textContent = ''), 1800);
+    });
+  });
+</script>
+
 <script define:vars={{
   shortname: 'https-hiroforyou-github-io-cristhian',
   identifier: post.slug,
@@ -150,66 +350,361 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     this.page.identifier = identifier;
     this.page.title = title;
   };
-  (function () {
+  // Disqus is heavy, so it only loads once the reader gets near the end.
+  const thread = document.getElementById('disqus_thread');
+  const loadDisqus = () => {
     const script = document.createElement('script');
     script.src = `https://${shortname}.disqus.com/embed.js`;
     script.setAttribute('data-timestamp', String(+new Date()));
     (document.head || document.body).appendChild(script);
-  })();
+  };
+  if (thread && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          observer.disconnect();
+          loadDisqus();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+    observer.observe(thread);
+  } else {
+    loadDisqus();
+  }
 </script>
 
 <style>
-  .post-layout {
-    padding-top: 64px;
-    max-width: 1080px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 260px;
-    gap: 48px;
-    align-items: start;
+  .post {
+    --measure: 690px;
+    max-width: 1120px;
+    padding-top: 56px;
   }
 
-  .post__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
+  /* ---------- Header ---------- */
+
+  .post-head {
+    max-width: 860px;
+    padding-bottom: 40px;
+    margin-bottom: 48px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .post-head__crumbs {
+    display: flex;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: var(--color-text-muted);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
 
-  .post__back:hover {
+  .post-head__crumbs a {
+    color: var(--color-primary-light);
+  }
+
+  .post-head__crumbs a:hover {
     color: var(--color-primary);
   }
 
-  .post__meta {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
+  .post-head__title {
+    font-size: clamp(2.1rem, 5vw, 3.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    text-wrap: balance;
+  }
+
+  .post-head__dek {
+    font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+    line-height: 1.5;
     color: var(--color-text-muted);
-    margin-bottom: 8px;
+    max-width: 62ch;
+    margin-bottom: 28px;
+    text-wrap: pretty;
   }
 
-  .post__content {
-    line-height: 1.75;
-    margin-top: 24px;
+  .post-head__byline {
+    display: flex;
+    align-items: center;
+    gap: 14px;
   }
 
-  .post__content :global(h2) {
-    margin-top: 2em;
+  .post-head__byline :global(.post-head__avatar) {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-tag-border);
   }
 
-  .post__content :global(pre) {
-    background: var(--color-surface);
+  .post-head__author {
+    display: block;
+    font-weight: 600;
+  }
+
+  .post-head__meta {
+    display: flex;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  /* ---------- Layout ---------- */
+
+  .post-body {
+    display: grid;
+    grid-template-columns: minmax(0, var(--measure)) 220px;
+    justify-content: space-between;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .post-aside {
+    position: sticky;
+    top: calc(var(--nav-h) + 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    font-size: 0.875rem;
+  }
+
+  .post-aside__label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+  }
+
+  .toc ol,
+  .toc-mobile ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc ol {
+    border-left: 1px solid var(--color-border);
+  }
+
+  .toc__item a {
+    display: block;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    padding: 5px 0 5px 14px;
+    transition: color 0.2s ease;
+  }
+
+  .toc a {
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+  }
+
+  .toc__item--h3 a {
+    padding-left: 26px;
+    font-size: 0.82rem;
+  }
+
+  .toc__item a:hover {
+    color: var(--color-text);
+  }
+
+  .toc a.is-active {
+    color: var(--color-text);
+    border-left-color: var(--color-primary);
+  }
+
+  .toc-mobile {
+    display: none;
+  }
+
+  .share__row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .share__row a,
+  .share__copy {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-card);
-    padding: 16px;
-    overflow-x: auto;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   }
 
-  .post__content :global(img) {
+  .share__row a:hover,
+  .share__copy:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary-light);
+    transform: translateY(-2px);
+  }
+
+  .share__copied {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--color-primary-light);
+    pointer-events: none;
+  }
+
+  /* ---------- Prose ---------- */
+
+  .prose {
+    font-size: 1.075rem;
+    line-height: 1.8;
+    color: color-mix(in srgb, var(--color-text) 88%, var(--color-text-muted));
+    overflow-wrap: break-word;
+  }
+
+  /* Lead paragraph, slightly larger — the way magazines open a story. */
+  .prose > :global(p:first-of-type) {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.4em;
+  }
+
+  .prose :global(h2),
+  .prose :global(h3) {
+    position: relative;
+    color: var(--color-text);
+    scroll-margin-top: calc(var(--nav-h) + 24px);
+    text-wrap: balance;
+  }
+
+  .prose :global(h2) {
+    font-size: clamp(1.5rem, 2.6vw, 1.85rem);
+    letter-spacing: -0.02em;
+    margin: 2.6em 0 0.7em;
+  }
+
+  .prose :global(h3) {
+    font-size: 1.25rem;
+    margin: 2em 0 0.6em;
+  }
+
+  .prose :global(.heading-anchor) {
+    margin-left: 0.4em;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .prose :global(h2:hover .heading-anchor),
+  .prose :global(h3:hover .heading-anchor),
+  .prose :global(.heading-anchor:focus-visible) {
+    opacity: 1;
+  }
+
+  .prose :global(strong) {
+    color: var(--color-text);
+    font-weight: 650;
+  }
+
+  .prose :global(a:not(.heading-anchor)) {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-primary);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+
+  .prose :global(a:not(.heading-anchor):hover) {
+    color: var(--color-primary);
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.3em;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 0.5em;
+    padding-left: 0.3em;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--color-primary);
+  }
+
+  .prose :global(:not(pre) > code) {
+    font-size: 0.86em;
+    padding: 0.15em 0.4em;
+    border-radius: 6px;
+    background: var(--color-tag-bg);
+    border: 1px solid var(--color-tag-border);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+
+  .prose :global(blockquote) {
+    margin: 2em 0;
+    padding: 18px 22px;
+    border-left: 3px solid var(--color-primary);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+    background: var(--color-tag-bg);
+    color: var(--color-text);
+  }
+
+  .prose :global(blockquote p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .prose :global(hr) {
+    border: none;
+    text-align: center;
+    margin: 3em 0;
+  }
+
+  .prose :global(hr::before) {
+    content: '· · ·';
+    letter-spacing: 0.6em;
+    color: var(--color-text-muted);
+  }
+
+  /* Figures: images break slightly out of the text column on wide
+     screens, with the alt text as a caption underneath. */
+  .prose :global(figure) {
+    margin: 2.4em 0;
+  }
+
+  .prose :global(img) {
+    display: block;
     max-width: 100%;
     height: auto;
+    margin: 0 auto;
     border-radius: var(--radius-card);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .prose :global(figcaption) {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    text-align: center;
+    text-wrap: balance;
   }
 
   /* Real phone screenshots (tall/portrait JPEGs) shouldn't stretch to the
@@ -218,58 +713,248 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
      "screen-" filename prefix (this post's own naming convention) rather
      than the dev-only "?origFormat=jpg" query param, which never appears
      in a production build's hashed /_astro/ output filenames. */
-  .post__content :global(img[src*='screen-']) {
-    display: block;
-    max-width: 320px;
-    margin: 0 auto;
+  .prose :global(img[src*='screen-']) {
+    max-width: 300px;
+    border-radius: 24px;
+    box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.45);
   }
 
-  .post__content :global(a) {
+  /* Tables */
+  .prose :global(.table-wrap) {
+    margin: 2em 0;
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .prose :global(th) {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+  }
+
+  .prose :global(th),
+  .prose :global(td) {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+
+  .prose :global(tr:last-child td) {
+    border-bottom: none;
+  }
+
+  .prose :global(tbody tr:hover) {
+    background: var(--color-tag-bg);
+  }
+
+  /* Code blocks (Shiki dual theme, switched by the site's data-mode). */
+  .prose :global(.code-block) {
+    margin: 2em 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .prose :global(.code-block__bar) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px 6px 16px;
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .prose :global(.code-block__copy) {
+    font: inherit;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .prose :global(.code-block__copy:hover) {
+    color: var(--color-text);
+    border-color: var(--color-border);
+  }
+
+  .prose :global(pre) {
+    margin: 2em 0;
+    padding: 18px 20px;
+    font-size: 0.86rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface) !important;
+  }
+
+  .prose :global(.code-block pre) {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  :global(:root[data-mode='dark']) .prose :global(.astro-code span) {
+    color: var(--shiki-dark);
+  }
+
+  :global(:root[data-mode='light']) .prose :global(.astro-code span) {
+    color: var(--shiki-light);
+  }
+
+  /* ---------- End of post ---------- */
+
+  .post-end {
+    margin-top: 64px;
+    font-size: 1rem;
+  }
+
+  .post-end__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .author-card {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    line-height: 1.6;
+  }
+
+  .author-card :global(.author-card__avatar) {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .author-card p {
+    margin: 0;
+  }
+
+  .author-card__label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .author-card__name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 6px;
+  }
+
+  .author-card__bio {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+  }
+
+  .author-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .post-nav__link {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    color: var(--color-text);
+    line-height: 1.35;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .post-nav__link:hover {
+    color: var(--color-text);
+    border-color: var(--color-primary-light);
+    transform: translateY(-2px);
+  }
+
+  .post-nav__link--next {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .post-nav__dir,
+  .post-nav__date {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .post-nav__dir {
+    color: var(--color-primary-light);
+  }
+
+  .post-nav__title {
+    font-weight: 650;
+  }
+
+  .post-end__edit {
+    display: inline-block;
+    margin-top: 28px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-end__edit:hover {
     color: var(--color-primary);
   }
 
   .post__comments {
     margin-top: 48px;
-    padding-top: 32px;
+    padding-block: 32px 0;
     border-top: 1px solid var(--color-border);
   }
 
-  .post-sidebar {
-    position: sticky;
-    /* Just enough to clear the floating navbar — any more than that is
-       just dead space above "Tags" once it's pinned. */
-    top: calc(var(--nav-h) + 4px);
-  }
-
-  .post-sidebar__section {
-    margin-bottom: 32px;
-  }
-
-  .post-sidebar__section h2 {
-    font-size: 1rem;
-    margin-bottom: 12px;
-  }
-
-  .post-sidebar__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .post-sidebar__share {
-    display: flex;
-    gap: 14px;
-  }
-
-  .post-sidebar__share a {
-    color: var(--color-primary);
-  }
-
-  .post-sidebar__github {
-    display: inline-block;
-    font-size: 0.9rem;
-    padding-top: 16px;
-    border-top: 1px solid var(--color-border);
+  .post__comments-title {
+    font-size: 1.1rem;
+    margin: 0 0 16px;
   }
 
   /* Bottom-left (not right) so it never collides with the mobile nav's
@@ -310,37 +995,100 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
     color: var(--color-primary);
   }
 
-  @media (max-width: 860px) {
-    .post-layout {
-      /* minmax(0, ...), not a bare 1fr — a plain 1fr still defaults to
-         min-width: auto for grid track sizing, so a wide image or
-         unbreakable text (the file-tree screenshot in this post, for
-         instance) blows out the track — and the whole page — past the
-         viewport width. */
+  /* ---------- Responsive ---------- */
+
+  @media (max-width: 960px) {
+    /* minmax(0, ...), not a bare 1fr — a plain 1fr still defaults to
+       min-width: auto for grid track sizing, so a wide image or
+       unbreakable text blows out the track — and the whole page — past
+       the viewport width. */
+    .post-body {
       grid-template-columns: minmax(0, 1fr);
-      gap: 32px;
+      gap: 40px;
     }
 
-    .post-sidebar {
+    .post__content {
+      max-width: var(--measure);
+    }
+
+    .post-aside {
       position: static;
-      border-top: 1px solid var(--color-border);
-      padding-top: 24px;
+    }
+
+    .toc {
+      display: none;
+    }
+
+    .toc-mobile {
+      display: block;
+      margin-bottom: 2em;
+      padding: 14px 18px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      background: var(--color-surface);
+      font-size: 0.92rem;
+    }
+
+    .toc-mobile summary {
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    .toc-mobile ol {
+      margin-top: 10px;
+    }
+
+    .toc-mobile .toc__item a {
+      padding-left: 0;
+    }
+
+    .toc-mobile .toc__item--h3 a {
+      padding-left: 14px;
     }
   }
 
   @media (max-width: 600px) {
-    .post-layout {
+    .post {
       padding-top: 32px;
     }
 
-    .post__content :global(pre) {
-      padding: 12px;
-      font-size: 0.85rem;
+    .post-head {
+      margin-bottom: 32px;
+      padding-bottom: 28px;
+    }
+
+    .prose {
+      font-size: 1.02rem;
+    }
+
+    .prose > :global(p:first-of-type) {
+      font-size: 1.1rem;
+    }
+
+    .prose :global(pre) {
+      padding: 14px;
+      font-size: 0.8rem;
+    }
+
+    .author-card {
+      flex-direction: column;
+    }
+
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-nav__link--next {
+      grid-column: auto;
     }
 
     /* Leave room so the fixed mobile nav FAB doesn't cover the last
-       comment / GitHub-edit link. */
-    .post-sidebar__github {
+       comment block. */
+    .post__comments {
       margin-bottom: 80px;
     }
   }

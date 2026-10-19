@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@astrojs/react": "^4.2.0",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.2.1",
     "@fontsource-variable/inter-tight": "5.2.7",
     "@fontsource/instrument-serif": "5.2.8",

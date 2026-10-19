@@ -4,6 +4,7 @@ date: 2026-10-16
 author: Cristhian Wiki
 tags: ['neuroscience', 'python', 'fnirs', 'education']
 excerpt: 'I can train a neural network, but I could not explain a real neuron. So I built myself an 18-week roadmap, a set of browser demos, and ended up analysing real brain data.'
+cover: ./images/demo-fnirs.webp
 ---
 
 Most of what I have written on this blog is about artificial neural networks. Layers, losses,
@@ -116,9 +117,11 @@ part of the question I was asking.
 
 ### A license I almost missed
 
-When I wanted to put this data in a public demo, I read the dataset's README properly: *"Please use
-only for Cedalion example notebooks. No other use permitted."* So the notebook downloads that data
-when it runs, and the repository never ships it. For the demo I switched to an open dataset,
+When I wanted to put this data in a public demo, I read the dataset's README properly:
+
+> Please use only for Cedalion example notebooks. No other use permitted.
+
+So the notebook downloads that data when it runs, and the repository never ships it. For the demo I switched to an open dataset,
 [fNIRS Finger Tapping Data in BIDS Format](https://doi.org/10.5281/zenodo.5529797) by Robert Luke
 and David McAlpine, with 5 subjects and 30 trials per condition. A script runs the same analysis on
 all of them in about 18 minutes and writes the results into a file the page loads directly.
