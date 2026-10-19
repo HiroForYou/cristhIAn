@@ -11,6 +11,10 @@ const blog = defineCollection({
       author: z.string().default('Cristhian Wiki'),
       tags: z.array(z.string()).default([]),
       excerpt: z.string().optional(),
+      // Search-result overrides for when the title or excerpt runs past what
+      // Google shows (~60 and ~155 chars). The page itself keeps the originals.
+      seoTitle: z.string().optional(),
+      seoDescription: z.string().optional(),
       // Thumbnail for the blog index; usually one of the post's own images.
       cover: image().optional(),
     }),

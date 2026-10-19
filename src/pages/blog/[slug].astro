@@ -51,6 +51,12 @@ const ogImage = post.data.cover ? `/blog/${post.slug}/og.png` : undefined;
 const ogImageUrl = new URL(ogImage ?? '/images/social-banner.jpg', Astro.site).toString();
 const modified = post.data.updated ?? post.data.date;
 
+// The site name is appended only while the whole title still fits in a
+// search result; past that it would just push the post's own words out.
+const SITE_SUFFIX = ' — Cristhian Wiki';
+const baseTitle = post.data.seoTitle ?? post.data.title;
+const pageTitle = baseTitle.length + SITE_SUFFIX.length <= 65 ? baseTitle + SITE_SUFFIX : baseTitle;
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -83,8 +89,8 @@ const breadcrumbs = {
 ---
 
 <Layout
-  title={`${post.data.title} — Cristhian Wiki`}
-  description={post.data.excerpt}
+  title={pageTitle}
+  description={post.data.seoDescription ?? post.data.excerpt}
   image={ogImage}
   article={{ publishedTime: post.data.date, modifiedTime: modified, tags: post.data.tags }}
 >

@@ -5,6 +5,8 @@ author: Cristhian Wiki
 tags: ['expo', 'react-native', 'android', 'nodejs']
 excerpt: 'How I built MusicDown, an Expo/React Native app that turns a YouTube link into a tagged MP3 on your phone — plus the Android 14 permission bug that took the longest to figure out.'
 cover: ./images/architecture.svg
+seoTitle: 'MusicDown: Expo MP3 Downloader & Android 14 Permission Bug'
+seoDescription: "How I built an Expo app that turns a YouTube link into a tagged MP3, and fixed expo-media-library's silent write failures on Android 14."
 ---
 
 I take the same commute most days, and it's the same story every time: signal drops the second
