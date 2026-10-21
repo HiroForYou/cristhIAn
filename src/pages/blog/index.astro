@@ -27,12 +27,43 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
 });
 
 const [featured] = posts;
+
+// Without an explicit date Google guesses one from the page text and tends
+// to pick the oldest post in the list, making the blog look abandoned.
+// The Blog node gives it the real last update and the list of posts.
+const SITE = 'https://www.cristhianwiki.com';
+const lastUpdated = new Date(
+  Math.max(...posts.map(post => (post.data.updated ?? post.data.date).valueOf()))
+);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  '@id': `${SITE}/blog/#blog`,
+  name: 'Cristhian Wiki — Blog',
+  description:
+    'Notes on machine learning engineering, MLOps, and the side projects I build along the way.',
+  url: `${SITE}/blog/`,
+  inLanguage: 'en',
+  dateModified: lastUpdated.toISOString(),
+  author: { '@id': `${SITE}/#person` },
+  publisher: { '@id': `${SITE}/#person` },
+  isPartOf: { '@id': `${SITE}/#website` },
+  blogPost: posts.map(post => ({
+    '@type': 'BlogPosting',
+    '@id': `${SITE}/blog/${post.slug}/#article`,
+    headline: post.data.title,
+    url: `${SITE}/blog/${post.slug}/`,
+    datePublished: post.data.date.toISOString(),
+    dateModified: (post.data.updated ?? post.data.date).toISOString(),
+  })),
+};
 ---
 
 <Layout
   title="Blog — Cristhian Wiki"
   description="Notes on machine learning engineering, MLOps, and the side projects I build along the way."
 >
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
   <Navbar client:load />
   <main>
     <section class="container blog-index">

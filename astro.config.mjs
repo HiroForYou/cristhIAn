@@ -23,6 +23,8 @@ const postLastmod = new Map(
         : [];
     })
 );
+// The blog index changes whenever any post does.
+if (postLastmod.size) postLastmod.set(`${SITE}/blog/`, [...postLastmod.values()].sort().at(-1));
 
 export default defineConfig({
   site: SITE,

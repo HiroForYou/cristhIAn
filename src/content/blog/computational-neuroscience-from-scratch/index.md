@@ -5,7 +5,7 @@ author: Cristhian Wiki
 tags: ['neuroscience', 'python', 'fnirs', 'education']
 excerpt: 'I can train a neural network, but I could not explain a real neuron. So I built myself an 18-week roadmap, a set of browser demos, and ended up analysing real brain data.'
 cover: ./images/demo-fnirs.webp
-seoTitle: 'Computational Neuroscience From Scratch: An 18-Week Roadmap'
+seoTitle: 'Computational Neuroscience From Scratch: 18-Week Roadmap'
 seoDescription: 'An 18-week computational neuroscience roadmap: LIF and Hodgkin-Huxley models, 9 interactive browser demos, and an fNIRS analysis of real brain data.'
 ---
 
