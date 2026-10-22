@@ -1,27 +1,36 @@
 [
   {
-    "title": "Chatbot with PyTorch 🤖",
+    "title": { "en": "Chatbot with PyTorch 🤖", "es": "Chatbot con PyTorch 🤖" },
     "links": {
       "demo": "https://github.com/HiroForYou/PyTorch-Chatbot/raw/master/src/demo.gif",
       "src": "https://github.com/HiroForYou/PyTorch-Chatbot"
     },
-    "description": "The architecture used was a feedforward network (very simple). The network receives a input vector as a result of preprocessing (length equal to size of bag of words). Subsequently, it shows the user a random response (from the json file) based on that category."
+    "description": {
+      "en": "The architecture used was a feedforward network (very simple). The network receives a input vector as a result of preprocessing (length equal to size of bag of words). Subsequently, it shows the user a random response (from the json file) based on that category.",
+      "es": "La arquitectura es una red feedforward (muy simple). La red recibe un vector de entrada resultado del preprocesamiento (de largo igual al tamaño del bag of words) y luego le muestra al usuario una respuesta aleatoria (del archivo json) según esa categoría."
+    }
   },
   {
-    "title": "Snake with PyTorch 🔥",
+    "title": { "en": "Snake with PyTorch 🔥", "es": "Snake con PyTorch 🔥" },
     "links": {
       "demo": "https://github.com/HiroForYou/Snake-PyTorch/raw/master/src/demo.gif",
       "src": "https://github.com/HiroForYou/Snake-PyTorch"
     },
-    "description": "The agent will learn to find the right way to get to his reward (food); to do this, it will use DQN techniques, which combine Bellman's equations and neural networks for estimating the Q values. The agent was built with PyTorch, while the game environment was built with PyGame (if you want you can opt for GYM)."
+    "description": {
+      "en": "The agent will learn to find the right way to get to his reward (food); to do this, it will use DQN techniques, which combine Bellman's equations and neural networks for estimating the Q values. The agent was built with PyTorch, while the game environment was built with PyGame (if you want you can opt for GYM).",
+      "es": "El agente aprende a encontrar el camino hacia su recompensa (la comida) con técnicas de DQN, que combinan las ecuaciones de Bellman con redes neuronales para estimar los valores Q. El agente está hecho con PyTorch y el entorno del juego con PyGame (si prefieres, puedes usar GYM)."
+    }
   },
   {
-    "title": "Reinforced Learning",
+    "title": { "en": "Reinforced Learning", "es": "Aprendizaje por refuerzo" },
     "links": {
       "demo": "https://colab.research.google.com/github/HiroForYou/RL-Algorithms/blob/master/main.ipynb",
       "src": "https://github.com/HiroForYou/RL-Algorithms"
     },
-    "description": "Models of RL using GYM and Pytorch."
+    "description": {
+      "en": "Models of RL using GYM and Pytorch.",
+      "es": "Modelos de RL con GYM y PyTorch."
+    }
   },
   {
     "title": "faceAcecom",
@@ -29,7 +38,10 @@
       "demo": "https://github.com/AcecomFCUNI/faceAcecom/raw/master/faceAcecomV1/steps.gif",
       "src": "https://github.com/AcecomFCUNI/faceAcecom"
     },
-    "description": "Summer 2020 project on facial recognition with Tensorflow."
+    "description": {
+      "en": "Summer 2020 project on facial recognition with Tensorflow.",
+      "es": "Proyecto del verano 2020 sobre reconocimiento facial con TensorFlow."
+    }
   },
   {
     "title": "Deep Learning Collection",
@@ -37,14 +49,20 @@
       "demo": "https://github.com/HiroForYou/Deep-Learning-Collection",
       "src": "https://github.com/HiroForYou/Deep-Learning-Collection"
     },
-    "description": "Implementations to learn about ML, DL, PyTorch and TensorFlow from basic to advanced level."
+    "description": {
+      "en": "Implementations to learn about ML, DL, PyTorch and TensorFlow from basic to advanced level.",
+      "es": "Implementaciones para aprender ML, DL, PyTorch y TensorFlow desde lo básico hasta lo avanzado."
+    }
   },
   {
-    "title": "Mnist with Onnx 💛",
+    "title": { "en": "Mnist with Onnx 💛", "es": "MNIST con ONNX 💛" },
     "links": {
       "demo": "https://vgzep.csb.app",
       "src": "https://github.com/HiroForYou/pytorch-to-javascript-with-onnx-js"
     },
-    "description": "Running mnist digits classifier in the browser using ONNX.js."
+    "description": {
+      "en": "Running mnist digits classifier in the browser using ONNX.js.",
+      "es": "Clasificador de dígitos MNIST corriendo en el navegador con ONNX.js."
+    }
   }
 ]

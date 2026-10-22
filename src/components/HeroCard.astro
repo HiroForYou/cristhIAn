@@ -1,3 +1,12 @@
+---
+import { getLang, useTranslations } from '@/i18n';
+
+const t = useTranslations(getLang(Astro.url.pathname));
+const outputs = [t('hero.out1'), t('hero.out2'), t('hero.out3'), t('hero.out4')];
+// String literals inside profile.py; the code around them stays as is.
+const codeStrings = JSON.stringify({ role: t('hero.codeRole'), build: t('hero.codeBuild') });
+---
+
 <div class="hero-card">
   <div class="hero-card__frame" id="hero-card-frame">
     <div class="hero-card__titlebar">
@@ -8,7 +17,7 @@
       <span class="hero-card__meta">Python 3.12</span>
     </div>
 
-    <div class="hero-card__code" id="hero-card-code">
+    <div class="hero-card__code" id="hero-card-code" data-strings={codeStrings}>
       <div class="hero-card__gutter" id="hero-card-gutter"></div>
       <pre class="hero-card__lines" id="hero-card-lines"></pre>
     </div>
@@ -22,22 +31,17 @@
         <div class="hc-line" id="hc-cmd-line">
           <span class="hc-prompt">$ </span><span id="hc-cmd-text"></span><span class="hc-caret" id="hc-caret"></span>
         </div>
-        <div class="hc-line" data-output="FastAPI APIs">
-          <span class="hc-check">  ✓  </span><span class="hc-output">FastAPI APIs</span>
-        </div>
-        <div class="hc-line" data-output="ML models trained">
-          <span class="hc-check">  ✓  </span><span class="hc-output">ML models trained</span>
-        </div>
-        <div class="hc-line" data-output="AWS deployment">
-          <span class="hc-check">  ✓  </span><span class="hc-output">AWS deployment</span>
-        </div>
-        <div class="hc-line" data-output="Production ready">
-          <span class="hc-check">  ✓  </span><span class="hc-output">Production ready</span>
-        </div>
+        {
+          outputs.map(output => (
+            <div class="hc-line" data-output={output}>
+              <span class="hc-check">{'  ✓  '}</span><span class="hc-output">{output}</span>
+            </div>
+          ))
+        }
         <div class="hc-line hero-card__status">
           <span class="hero-card__status-dot"></span>
-          <span class="hero-card__status-label">Status:</span>
-          <span class="hero-card__status-value">Shipping ML systems in production</span>
+          <span class="hero-card__status-label">{t('hero.status')}</span>
+          <span class="hero-card__status-value">{t('hero.statusValue')}</span>
         </div>
       </div>
     </div>
@@ -346,6 +350,7 @@
 </style>
 
 <script>
+  const strings = JSON.parse(document.getElementById('hero-card-code')?.dataset.strings ?? '{}');
   const CODE = [
     [['from', 'kw'], [' ', ''], ['fastapi', 'mod'], [' ', ''], ['import', 'kw'], [' ', ''], ['FastAPI', 'cls']],
     [['import', 'kw'], [' ', ''], ['torch', 'mod']],
@@ -353,11 +358,11 @@
     [['class', 'kw'], [' ', ''], ['MLEngineer', 'cls'], [':', '']],
     [['    ', ''], ['def', 'kw'], [' ', ''], ['__init__', 'cls'], ['(', ''], ['self', 'kw'], ['):', '']],
     [['        ', ''], ['self', 'kw'], ['.name = ', ''], ['"Cristhian Wiki"', 'str']],
-    [['        ', ''], ['self', 'kw'], ['.role = ', ''], ['"Machine Learning Engineer"', 'str']],
+    [['        ', ''], ['self', 'kw'], ['.role = ', ''], [`"${strings.role}"`, 'str']],
     [['        ', ''], ['self', 'kw'], ['.stack = [', ''], ['"PyTorch"', 'str'], [', ', ''], ['"FastAPI"', 'str'], [', ', ''], ['"AWS"', 'str'], [']', '']],
     [],
     [['    ', ''], ['def', 'kw'], [' ', ''], ['build', 'cls'], ['(', ''], ['self', 'kw'], ['):', '']],
-    [['        ', ''], ['return', 'kw'], [' ', ''], ['"production ML systems"', 'str']],
+    [['        ', ''], ['return', 'kw'], [' ', ''], [`"${strings.build}"`, 'str']],
   ];
 
   const gutter = document.getElementById('hero-card-gutter');

@@ -1,18 +1,26 @@
 ---
+import { getLang, useTranslations } from '@/i18n';
+
 const EMAIL = 'christiansanchezsaune@gmail.com';
 const LINKEDIN_URL = 'https://linkedin.com/in/cristhian-wiki/';
 const GITHUB_URL = 'https://github.com/HiroForYou';
 
+const t = useTranslations(getLang(Astro.url.pathname));
+
 // Each letter is its own span so it can hop on hover; words stay
 // unbreakable so a line never wraps mid-word.
-const lines = [{ text: 'Let’s build' }, { text: 'something', accent: 'together.' }];
+const lines = [
+  { text: t('contact.line1') },
+  { text: t('contact.line2'), accent: t('contact.accent') },
+];
+const heading = `${t('contact.line1')} ${t('contact.line2')} ${t('contact.accent')}`;
 const toWords = (text: string) => text.split(' ').map(word => Array.from(word));
 ---
 
 <section id="contact" class="contact-section">
   <div class="container">
-    <p class="eyebrow"><b>06</b>Contact</p>
-    <h2 class="ct-h" aria-label="Let’s build something together.">
+    <p class="eyebrow"><b>06</b>{t('contact.eyebrow')}</p>
+    <h2 class="ct-h" aria-label={heading}>
       {
         lines.map(line => (
           <span class="ct-line" aria-hidden="true">
@@ -36,15 +44,23 @@ const toWords = (text: string) => text.split(' ').map(word => Array.from(word));
         ))
       }
     </h2>
-    <p class="ct-text">Open to ML/AI conversations, collaborations, or opportunities.</p>
+    <p class="ct-text">{t('contact.text')}</p>
 
     <div class="ct-grid">
       <div>
-        <p class="ct-label">Write to me</p>
+        <p class="ct-label">{t('contact.write')}</p>
         <div class="ct-mail">
           <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-          <button type="button" class="ct-copy" id="ct-copy" data-email={EMAIL} aria-label="Copy email address">
-            Copy
+          <button
+            type="button"
+            class="ct-copy"
+            id="ct-copy"
+            data-email={EMAIL}
+            data-copied={t('contact.copied')}
+            data-copied-status={t('contact.copiedStatus')}
+            aria-label={t('contact.copyLabel')}
+          >
+            {t('contact.copy')}
           </button>
           <span class="sr-only" id="ct-copy-status" aria-live="polite"></span>
         </div>
@@ -64,13 +80,13 @@ const toWords = (text: string) => text.split(' ').map(word => Array.from(word));
         </div>
       </div>
 
-      <a class="ct-badge" href={`mailto:${EMAIL}`} aria-label={`Say hello — email ${EMAIL}`}>
+      <a class="ct-badge" href={`mailto:${EMAIL}`} aria-label={`${t('contact.badgeLabel')} ${EMAIL}`}>
         <svg class="ct-badge__ring" viewBox="0 0 156 156" aria-hidden="true">
           <defs>
             <path id="ct-badge-circle" d="M78 78 m-60 0 a60 60 0 1 1 120 0 a60 60 0 1 1 -120 0"></path>
           </defs>
           <text font-family="var(--font-mono)" font-size="11.5" letter-spacing="3.2" fill="currentColor">
-            <textPath href="#ct-badge-circle">SAY HELLO · SAY HELLO · SAY HELLO · </textPath>
+            <textPath href="#ct-badge-circle">{t('contact.badge').repeat(3)}</textPath>
           </text>
         </svg>
         <span class="ct-badge__core" aria-hidden="true">↗</span>
@@ -90,6 +106,7 @@ const toWords = (text: string) => text.split(' ').map(word => Array.from(word));
 
   const copyButton = document.getElementById('ct-copy');
   const copyStatus = document.getElementById('ct-copy-status');
+  const copyLabel = copyButton?.textContent?.trim() ?? '';
   let resetTimer = 0;
 
   copyButton?.addEventListener('click', async () => {
@@ -104,12 +121,12 @@ const toWords = (text: string) => text.split(' ').map(word => Array.from(word));
       document.execCommand('copy');
       field.remove();
     }
-    copyButton.textContent = 'Copied ✓';
+    copyButton.textContent = copyButton.dataset.copied ?? '';
     copyButton.classList.add('is-done');
-    if (copyStatus) copyStatus.textContent = 'Email address copied to clipboard';
+    if (copyStatus) copyStatus.textContent = copyButton.dataset.copiedStatus ?? '';
     clearTimeout(resetTimer);
     resetTimer = window.setTimeout(() => {
-      copyButton.textContent = 'Copy';
+      copyButton.textContent = copyLabel;
       copyButton.classList.remove('is-done');
       if (copyStatus) copyStatus.textContent = '';
     }, 2200);

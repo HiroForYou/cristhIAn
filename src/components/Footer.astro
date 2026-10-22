@@ -1,8 +1,14 @@
+---
+import { getLang, useTranslations } from '@/i18n';
+
+const t = useTranslations(getLang(Astro.url.pathname));
+---
+
 <footer class="footer">
   <div class="container footer__inner">
     <span>© {new Date().getFullYear()} Cristhian Wiki</span>
     <a href="https://github.com/HiroForYou" target="_blank" rel="noopener noreferrer">
-      Made with ❤
+      {t('footer.made')}
     </a>
   </div>
 </footer>

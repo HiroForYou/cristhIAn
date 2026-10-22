@@ -1,12 +1,15 @@
 ---
 import CaseStudies from './CaseStudies.astro';
 import SmallProjects from './SmallProjects.astro';
+import { getLang, useTranslations } from '@/i18n';
+
+const t = useTranslations(getLang(Astro.url.pathname));
 ---
 
 <section id="projects">
   <div class="container">
-    <p class="eyebrow"><b>05</b>Projects</p>
-    <h2 class="section-title">Selected <em>work.</em></h2>
+    <p class="eyebrow"><b>05</b>{t('projects.eyebrow')}</p>
+    <h2 class="section-title" set:html={t('projects.title')} />
 
     <CaseStudies />
     <SmallProjects />

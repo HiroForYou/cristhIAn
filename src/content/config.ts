@@ -1,7 +1,16 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+// English files are `index.md` / `name.md`; their Spanish versions sit next
+// to them as `index.es.md` / `name.es.md`, so relative image paths work in
+// both. Ids come out as "slug" and "es/slug" (see src/utils/content.js).
+const localizedId = ({ entry }: { entry: string }) => {
+  const slug = entry.replace(/(\.es)?\.md$/, '').replace(/\/index$/, '');
+  return entry.endsWith('.es.md') ? `es/${slug}` : slug;
+};
 
 const blog = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '*/index*.md', base: './src/content/blog', generateId: localizedId }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -21,7 +30,7 @@ const blog = defineCollection({
 });
 
 const caseStudies = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '*.md', base: './src/content/caseStudies', generateId: localizedId }),
   schema: z.object({
     order: z.number().default(0),
     title: z.string(),

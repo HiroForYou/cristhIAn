@@ -18,18 +18,20 @@ const BACKGROUND = '#191919';
 async function coverPath(post: CollectionEntry<'blog'>) {
   const fsPath = (post.data.cover as { fsPath?: string } | undefined)?.fsPath;
   if (fsPath) return fsPath;
-  const file = path.resolve('src/content/blog', post.id);
+  const file = path.resolve(post.filePath!);
   const raw = await readFile(file, 'utf8');
   const match = raw.match(/^cover:\s*['"]?([^'"\r\n]+)/m);
   if (!match) throw new Error(`No cover path found in ${file}`);
   return path.resolve(path.dirname(file), match[1].trim());
 }
 
+// One card per post, generated from the English entry and shared by the
+// Spanish page (same slug, same cover).
 export const getStaticPaths = (async () => {
-  const posts = await getCollection('blog');
+  const posts = await getCollection('blog', post => !post.id.startsWith('es/'));
   return posts
     .filter(post => post.data.cover)
-    .map(post => ({ params: { slug: post.slug }, props: { post } }));
+    .map(post => ({ params: { slug: post.id }, props: { post } }));
 }) satisfies GetStaticPaths;
 
 export const GET: APIRoute<{ post: CollectionEntry<'blog'> }> = async ({ props }) => {

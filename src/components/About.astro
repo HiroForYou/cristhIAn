@@ -2,18 +2,31 @@
 import { Image } from 'astro:assets';
 import avatar from '@/assets/avatar-photo.jpg';
 import SkewBg from './SkewBg.astro';
+import { getLang, pick, useTranslations } from '@/i18n';
+
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
 
 const quotes = [
   {
-    text: 'Any fool can write code that a computer understands. Good programmers write code that humans can understand.',
+    text: {
+      en: 'Any fool can write code that a computer understands. Good programmers write code that humans can understand.',
+      es: 'Cualquier tonto puede escribir código que una computadora entienda. Los buenos programadores escriben código que los humanos pueden entender.',
+    },
     author: 'Martin Fowler',
   },
   {
-    text: "Nothing interferes with my concentration. You could put on an orgy in my office and I wouldn't look up. Well, maybe once.",
+    text: {
+      en: "Nothing interferes with my concentration. You could put on an orgy in my office and I wouldn't look up. Well, maybe once.",
+      es: 'Nada interfiere con mi concentración. Podrías montar una orgía en mi oficina y no levantaría la vista. Bueno, quizá una vez.',
+    },
     author: 'Isaac Asimov',
   },
   {
-    text: 'Somewhere, something incredible is waiting to be known.',
+    text: {
+      en: 'Somewhere, something incredible is waiting to be known.',
+      es: 'En algún lugar, algo increíble está esperando ser descubierto.',
+    },
     author: 'Carl Sagan',
   },
 ];
@@ -22,26 +35,17 @@ const quotes = [
 <section id="about" class="about-section">
   <SkewBg />
   <div class="container about">
-    <p class="eyebrow"><b>01</b>About</p>
-    <h2 class="section-title">A bit about <em>me.</em></h2>
+    <p class="eyebrow"><b>01</b>{t('about.eyebrow')}</p>
+    <h2 class="section-title" set:html={t('about.title')} />
 
     <div class="about__intro">
       <Image class="about__avatar" src={avatar} alt="Cristhian Wiki" width={230} height={230} />
       <p>
-        Hi, I'm Cristhian Wiki, a passionate machine learning engineer and
-        self-taught researcher from Peru. I am a PyTorch lover, very
-        interested in the creation of novel neural network architectures
-        (SOA), as well as their rapid implementation and accessibility
-        (using MLOps tools).
+        {t('about.p1')}
         <br /><br />
-        My goal as a human being is to be able to change the world and make
-        it a better place (using deep learning and lots of creativity). I
-        love a good challenge, and I'm planning to pursue a Master's or PhD
-        next, focused on deep learning and neuroscience.
+        {t('about.p2')}
         <br /><br />
-        Outside of work, you'll find me riding motorcycles, tinkering with
-        cars, traveling whenever I can, and at the gym — but especially
-        hanging out with my cats, who are pretty much my whole world.
+        {t('about.p3')}
       </p>
     </div>
 
@@ -49,7 +53,7 @@ const quotes = [
       {
         quotes.map(quote => (
           <blockquote class="card">
-            <p>&ldquo;{quote.text}&rdquo;</p>
+            <p>&ldquo;{pick(quote.text, lang)}&rdquo;</p>
             <cite>— {quote.author}</cite>
           </blockquote>
         ))

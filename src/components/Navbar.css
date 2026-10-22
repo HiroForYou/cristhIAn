@@ -102,6 +102,7 @@
 
 .navbar.is-scrolled .navbar__pill,
 .navbar.is-scrolled .navbar__mode-toggle,
+.navbar.is-scrolled .navbar__lang,
 .navbar__menu-btn {
   background: var(--nav-glass);
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
@@ -147,7 +148,8 @@
   color: var(--color-bg);
 }
 
-.navbar__mode-toggle {
+.navbar__mode-toggle,
+.navbar__lang {
   display: grid;
   place-items: center;
   width: 42px;
@@ -165,8 +167,18 @@
     box-shadow 0.5s var(--nav-ease);
 }
 
-.navbar__mode-toggle:hover {
+.navbar__mode-toggle:hover,
+.navbar__lang:hover {
   color: var(--color-primary);
+}
+
+/* Language switch: same round button as the mode toggle, with a label. */
+.navbar__lang {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
 }
 
 .navbar__menu-btn {
@@ -320,9 +332,15 @@
   color: var(--color-text-muted);
 }
 
+.navbar-overlay__toggles {
+  display: flex;
+  gap: 8px;
+}
+
 @media (max-width: 899px) {
   .navbar__pill,
-  .navbar__right > .navbar__mode-toggle {
+  .navbar__right > .navbar__mode-toggle,
+  .navbar__right > .navbar__lang {
     display: none;
   }
 

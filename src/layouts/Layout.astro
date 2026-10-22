@@ -3,6 +3,7 @@ import '@/styles/global.css';
 import ThemeVars from '@/components/ThemeVars.astro';
 import ThemeToggle from '@/components/ThemeToggle.astro';
 import { defaultPalette, defaultMode } from '@/config/palettes.js';
+import { getLang, languages, localizePath, basePath, ogLocale, useTranslations } from '@/i18n';
 
 interface Props {
   title?: string;
@@ -10,34 +11,54 @@ interface Props {
   image?: string;
   /** Blog posts pass their dates so the page is described as an article. */
   article?: { publishedTime: Date; modifiedTime?: Date; tags?: string[] };
+  /** False for pages that don't exist in the other language (the 404). */
+  translated?: boolean;
 }
 
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
+
 const {
-  title = 'Cristhian Wiki — Machine Learning Engineer',
-  description = 'Cristhian Wiki — Creative ML engineer who loves PyTorch and modern deep learning technologies.',
+  title = t('meta.title'),
+  description = t('meta.description'),
   image = '/images/social-banner.jpg',
   article,
+  translated = true,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// Every page links to itself and its other-language twin, with English as
+// the fallback for any other locale.
+const alternates = translated
+  ? [
+      ...languages.map(code => ({
+        hreflang: code,
+        href: new URL(localizePath(Astro.url.pathname, code), Astro.site).toString(),
+      })),
+      { hreflang: 'x-default', href: new URL(localizePath(Astro.url.pathname, 'en'), Astro.site).toString() },
+    ]
+  : [];
 ---
 
 <!doctype html>
-<html lang="en" data-theme={defaultPalette} data-mode={defaultMode}>
+<html lang={lang} data-theme={defaultPalette} data-mode={defaultMode}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
     <link rel="canonical" href={canonicalURL} />
+    {alternates.map(alt => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
     <meta name="robots" content="index, follow" />
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    <link rel="alternate" type="application/rss+xml" title="Cristhian Wiki — Blog" href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={t('meta.rss')} href={`${basePath(lang)}/rss.xml`} />
 
     <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:site_name" content="Cristhian Wiki" />
+    <meta property="og:locale" content={ogLocale[lang]} />
+    {translated && <meta property="og:locale:alternate" content={ogLocale[lang === 'es' ? 'en' : 'es']} />}
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -81,6 +102,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           '@id': 'https://www.cristhianwiki.com/#website',
           name: 'Cristhian Wiki',
           url: 'https://www.cristhianwiki.com',
+          inLanguage: languages,
           author: { '@id': 'https://www.cristhianwiki.com/#person' },
         },
       ],

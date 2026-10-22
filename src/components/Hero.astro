@@ -1,11 +1,15 @@
 ---
 import HeroCard from './HeroCard.astro';
+import { basePath, getLang, useTranslations } from '@/i18n';
+
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
 
 const RESUME_URL =
   'https://drive.google.com/uc?export=download&id=1TeDAOJI9E3R_jIHo5t8MiVpzmnM9VQM3';
 const GITHUB_URL = 'https://github.com/HiroForYou';
 const LINKEDIN_URL = 'https://linkedin.com/in/cristhian-wiki/';
-const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Learning Engineer'];
+const PHRASES = [t('hero.phrase1'), t('hero.phrase2'), t('hero.phrase1')];
 ---
 
 <section class="hero" id="top">
@@ -15,7 +19,7 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
     <div class="hero__text">
       <p class="eyebrow hero__eyebrow">
         <span class="hero__eyebrow-line" aria-hidden="true"></span>
-        Hello, I'm
+        {t('hero.hello')}
       </p>
       <h1>Cristhian Wiki</h1>
       <p class="hero__subtitle">
@@ -26,16 +30,15 @@ const PHRASES = ['Machine Learning Engineer', 'PyTorch lover ❤', 'Machine Lear
         >
       </p>
       <p class="hero__bio">
-        Self-taught ML engineer from Peru, shipping deep learning systems from
-        research to production — next up, grad school in deep learning and neuroscience.
+        {t('hero.bio')}
       </p>
 
       <div class="hero__cta">
         <a class="btn btn-primary" href={RESUME_URL} target="_blank" rel="noopener noreferrer">
-          Download Resume
+          {t('hero.resume')}
         </a>
-        <a class="btn btn-secondary hero__cta-secondary" href="/#projects">
-          View Projects
+        <a class="btn btn-secondary hero__cta-secondary" href={`${basePath(lang)}/#projects`}>
+          {t('hero.projects')}
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 8h8m0 0-3.5-3.5M12 8l-3.5 3.5"></path>
           </svg>

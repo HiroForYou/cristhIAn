@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { basePath, getLang, localizePath, useTranslations } from '@/i18n';
 import './Navbar.css';
 
-const links = [
-  { href: '/#about', label: 'About' },
-  { href: '/#experience', label: 'Experience' },
-  { href: '/#education', label: 'Education' },
-  { href: '/#projects', label: 'Projects' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/#contact', label: 'Contact' },
+// Paths are language-neutral; each render prefixes them with "/es" when needed.
+const navItems = [
+  { path: '/#about', key: 'nav.about' },
+  { path: '/#experience', key: 'nav.experience' },
+  { path: '/#education', key: 'nav.education' },
+  { path: '/#projects', key: 'nav.projects' },
+  { path: '/blog', key: 'nav.blog' },
+  { path: '/#contact', key: 'nav.contact' },
 ];
 
 // Three-layer flame mark (from llama_original.svg), recolored with theme
@@ -48,28 +50,45 @@ const MoonIcon = () => (
   </svg>
 );
 
-const ModeToggle = ({ mode, onToggle }) => (
+const ModeToggle = ({ mode, onToggle, t }) => (
   <button
     type="button"
     className="navbar__mode-toggle"
-    aria-label={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    aria-label={mode === 'dark' ? t('nav.toLight') : t('nav.toDark')}
     onClick={onToggle}
   >
     {mode === 'dark' ? <SunIcon /> : <MoonIcon />}
   </button>
 );
 
+// Reading progress bar along the top edge; temporarily turned off.
+const SHOW_PROGRESS = false;
+
 // Hash links that point at a section on the home page ("/#experience").
-const sectionIds = links.map(link => link.href.split('#')[1]).filter(Boolean);
+const sectionIds = navItems.map(item => item.path.split('#')[1]).filter(Boolean);
 
 // Pages outside the home page highlight the link they belong to: the blog
 // and its posts light up "Blog", case studies belong under "Projects".
 const routeLinks = [
-  { prefix: '/blog', href: '/blog' },
-  { prefix: '/case-studies', href: '/#projects' },
+  { prefix: '/blog', path: '/blog' },
+  { prefix: '/case-studies', path: '/#projects' },
 ];
-const linkForPath = path =>
-  routeLinks.find(({ prefix }) => path === prefix || path.startsWith(`${prefix}/`))?.href ?? null;
+const linkPathFor = pathname => {
+  const path = localizePath(pathname, 'en');
+  return routeLinks.find(({ prefix }) => path === prefix || path.startsWith(`${prefix}/`))?.path ?? null;
+};
+
+// Same page in the other language. On the home page it keeps the section
+// in view, so switching mid-scroll lands on the same section.
+const LangSwitch = ({ lang, pathname, activeId, t }) => {
+  const other = lang === 'es' ? 'en' : 'es';
+  const href = localizePath(pathname, other) + (activeId ? `#${activeId}` : '');
+  return (
+    <a className="navbar__lang" href={href} hrefLang={other} lang={other} aria-label={t('nav.switchLang')}>
+      {other.toUpperCase()}
+    </a>
+  );
+};
 
 // Lenis is mounted in Layout.astro; pause it while the menu overlay is open
 // so wheel input can't scroll the page underneath.
@@ -79,7 +98,11 @@ const setPageScrollLocked = locked => {
   document.documentElement.style.overflow = locked ? 'hidden' : '';
 };
 
-const Navbar = () => {
+const Navbar = ({ pathname = '/' }) => {
+  const lang = getLang(pathname);
+  const t = useTranslations(lang);
+  const base = basePath(lang);
+  const links = navItems.map(item => ({ href: base + item.path, label: t(item.key) }));
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState('dark');
   const [scrolled, setScrolled] = useState(false);
@@ -93,11 +116,12 @@ const Navbar = () => {
 
   useEffect(() => {
     setMode(document.documentElement.dataset.mode === 'light' ? 'light' : 'dark');
-    setRouteHref(linkForPath(window.location.pathname));
-  }, []);
+    const path = linkPathFor(window.location.pathname);
+    setRouteHref(path && base + path);
+  }, [base]);
 
   // A home-page section in view wins; otherwise fall back to the page's own link.
-  const activeHref = activeId ? `/#${activeId}` : routeHref;
+  const activeHref = activeId ? `${base}/#${activeId}` : routeHref;
 
   // Scrolled state, progress bar and active section, all from one
   // rAF-throttled scroll handler. The bar is written straight to the DOM.
@@ -193,11 +217,11 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="navbar__progress" ref={progressRef} aria-hidden="true" />
+      {SHOW_PROGRESS && <div className="navbar__progress" ref={progressRef} aria-hidden="true" />}
 
       <header className={`navbar${scrolled ? ' is-scrolled' : ''}`}>
         <div className="navbar__inner container">
-          <a href="/" className="navbar__brand" aria-label="Cristhian Wiki — home">
+          <a href={`${base}/`} className="navbar__brand" aria-label={t('nav.home')}>
             <span className="navbar__mark">
               <FlameLogo />
             </span>
@@ -205,7 +229,7 @@ const Navbar = () => {
           </a>
 
           <div className="navbar__right">
-            <nav className="navbar__pill" ref={pillRef} aria-label="Primary">
+            <nav className="navbar__pill" ref={pillRef} aria-label={t('nav.primary')}>
               <span className="navbar__indicator" ref={indicatorRef} aria-hidden="true" />
               {links.map(link => (
                 <a
@@ -218,7 +242,8 @@ const Navbar = () => {
                 </a>
               ))}
             </nav>
-            <ModeToggle mode={mode} onToggle={toggleMode} />
+            <LangSwitch lang={lang} pathname={pathname} activeId={activeId} t={t} />
+            <ModeToggle mode={mode} onToggle={toggleMode} t={t} />
             <button
               ref={menuButtonRef}
               type="button"
@@ -227,7 +252,7 @@ const Navbar = () => {
               aria-controls="menu-overlay"
               onClick={() => setIsOpen(true)}
             >
-              Menu <i aria-hidden="true" />
+              {t('nav.menu')} <i aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -238,7 +263,7 @@ const Navbar = () => {
         className={`navbar-overlay${isOpen ? ' is-open' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Site menu"
+        aria-label={t('nav.siteMenu')}
         inert={isOpen ? undefined : ''}
       >
         <div className="container navbar-overlay__top">
@@ -246,7 +271,7 @@ const Navbar = () => {
             <FlameLogo />
           </span>
           <button type="button" className="navbar-overlay__close" onClick={() => setIsOpen(false)}>
-            Close
+            {t('nav.close')}
           </button>
         </div>
         <ul className="container navbar-overlay__list">
@@ -267,7 +292,10 @@ const Navbar = () => {
         </ul>
         <div className="container navbar-overlay__foot">
           <a href="mailto:christiansanchezsaune@gmail.com">christiansanchezsaune@gmail.com</a>
-          <ModeToggle mode={mode} onToggle={toggleMode} />
+          <div className="navbar-overlay__toggles">
+            <LangSwitch lang={lang} pathname={pathname} activeId={activeId} t={t} />
+            <ModeToggle mode={mode} onToggle={toggleMode} t={t} />
+          </div>
         </div>
       </div>
     </>

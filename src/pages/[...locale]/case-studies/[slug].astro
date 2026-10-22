@@ -2,23 +2,30 @@
 import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
+import { getCaseStudies, entryLang, entrySlug } from '@/utils/content.js';
+import { localeParams, useTranslations } from '@/i18n';
 
 export async function getStaticPaths() {
-  const studies = await getCollection('caseStudies');
-  return studies.map(study => ({
-    params: { slug: study.slug },
-    props: { study },
-  }));
+  const pages = await Promise.all(
+    localeParams().map(async ({ params }) =>
+      (await getCaseStudies(params.locale ?? 'en')).map(study => ({
+        params: { ...params, slug: entrySlug(study) },
+        props: { study },
+      }))
+    )
+  );
+  return pages.flat();
 }
 
 const { study } = Astro.props;
+const t = useTranslations(entryLang(study));
 const { Content } = await render(study);
 const withProtocol = url => (url.startsWith('//') ? `https:${url}` : url);
 ---
 
 <Layout title={`${study.data.title} — Cristhian Wiki`} description={study.data.excerpt}>
-  <Navbar client:load />
+  <Navbar client:load pathname={Astro.url.pathname} />
   <main>
     <article class="container case-study-page">
       <h1>{study.data.title}</h1>
@@ -34,16 +41,16 @@ const withProtocol = url => (url.startsWith('//') ? `https:${url}` : url);
       </div>
 
       <div class="case-study-page__meta card">
-        <p><strong>Idea:</strong> {study.data.info.idea}</p>
+        <p><strong>{t('projects.idea')}</strong> {study.data.info.idea}</p>
         <div class="case-study-page__tags">
           {study.data.info.tech.map(tech => <span class="tag">{tech}</span>)}
         </div>
         <div class="case-study-page__links">
           <a class="btn btn-primary" href={withProtocol(study.data.demo)} target="_blank" rel="noopener noreferrer">
-            Live Demo
+            {t('projects.liveDemo')}
           </a>
           <a class="btn btn-secondary" href={withProtocol(study.data.src)} target="_blank" rel="noopener noreferrer">
-            Source
+            {t('projects.source')}
           </a>
           {study.data.info.links.map(([label, url]) => (
             <a class="btn btn-secondary" href={url} target="_blank" rel="noopener noreferrer">

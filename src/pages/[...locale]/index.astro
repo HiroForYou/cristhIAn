@@ -9,10 +9,13 @@ import TechStack from '@/components/TechStack.astro';
 import Projects from '@/components/Projects.astro';
 import Contact from '@/components/Contact.astro';
 import Footer from '@/components/Footer.astro';
+import { localeParams } from '@/i18n';
+
+export const getStaticPaths = localeParams;
 ---
 
 <Layout>
-  <Navbar client:load />
+  <Navbar client:load pathname={Astro.url.pathname} />
   <main>
     <Hero />
     <About />

@@ -3,23 +3,41 @@ import { Image } from 'astro:assets';
 import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import avatar from '@/assets/avatar-photo.jpg';
 import { slugify } from '@/utils/slugify.js';
 import { readingTime } from '@/utils/readingTime.js';
+import { getPosts, entryLang, entrySlug } from '@/utils/content.js';
+import { basePath, dateLocale, localeParams, useTranslations } from '@/i18n';
 
 export async function getStaticPaths() {
-  const posts = (await getCollection('blog')).sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  const pages = await Promise.all(
+    localeParams().map(async ({ params }) => {
+      const posts = await getPosts(params.locale ?? 'en');
+      return posts.map((post, i) => ({
+        params: { ...params, slug: entrySlug(post) },
+        // The list is newest first, so the "newer" neighbour sits at i - 1.
+        props: { post, newer: posts[i - 1], older: posts[i + 1] },
+      }));
+    })
   );
-  return posts.map((post, i) => ({
-    params: { slug: post.slug },
-    // The list is newest first, so the "newer" neighbour sits at i - 1.
-    props: { post, newer: posts[i - 1], older: posts[i + 1] },
-  }));
+  return pages.flat();
 }
 
 const { post, newer, older } = Astro.props;
+const lang = entryLang(post);
+const t = useTranslations(lang);
+const base = basePath(lang);
+const slug = entrySlug(post);
+// Strings the page scripts write at runtime.
+const scriptText = {
+  linkTo: t('post.linkTo'),
+  copy: t('post.copy'),
+  copied: t('post.copied'),
+  failed: t('post.failed'),
+  linkCopied: t('post.linkCopied'),
+  copyFailed: t('post.copyFailed'),
+};
 const { Content, headings } = await render(post);
 
 const toc = headings.filter(h => h.depth === 2 || h.depth === 3);
@@ -30,24 +48,25 @@ const shareLinks = {
   linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`,
   reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(post.data.title)}`,
 };
-const githubEditUrl = `https://github.com/HiroForYou/cristhIAn/tree/astro-migration/src/content/blog/${post.slug}/index.md`;
+const githubEditUrl = `https://github.com/HiroForYou/cristhIAn/tree/astro-migration/${post.filePath}`;
 
 // Frontmatter dates are parsed as UTC midnight; formatting them in the
 // build machine's local zone would shift them a day back.
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
+const dateFormatter = new Intl.DateTimeFormat(dateLocale[lang], {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
   timeZone: 'UTC',
 });
-const shortDate = new Intl.DateTimeFormat('en-US', {
+const shortDate = new Intl.DateTimeFormat(dateLocale[lang], {
   year: 'numeric',
   month: 'short',
   timeZone: 'UTC',
 });
 
-// Posts with a cover get a rasterized 1200x630 card from ./[slug]/og.png.ts.
-const ogImage = post.data.cover ? `/blog/${post.slug}/og.png` : undefined;
+// Posts with a cover get a rasterized 1200x630 card from
+// src/pages/blog/[slug]/og.png.ts, shared by both languages.
+const ogImage = post.data.cover ? `/blog/${slug}/og.png` : undefined;
 const ogImageUrl = new URL(ogImage ?? '/images/social-banner.jpg', Astro.site).toString();
 const modified = post.data.updated ?? post.data.date;
 
@@ -71,7 +90,7 @@ const structuredData = {
   publisher: { '@id': 'https://www.cristhianwiki.com/#person' },
   isPartOf: { '@id': 'https://www.cristhianwiki.com/#website' },
   url: postUrl,
-  inLanguage: 'en',
+  inLanguage: lang,
   keywords: post.data.tags.join(', '),
   wordCount: post.body.trim().split(/\s+/).length,
   timeRequired: `PT${minutes}M`,
@@ -81,8 +100,8 @@ const breadcrumbs = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.cristhianwiki.com/' },
-    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.cristhianwiki.com/blog/' },
+    { '@type': 'ListItem', position: 1, name: t('post.home'), item: `https://www.cristhianwiki.com${base}/` },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: `https://www.cristhianwiki.com${base}/blog/` },
     { '@type': 'ListItem', position: 3, name: post.data.title, item: postUrl },
   ],
 };
@@ -97,16 +116,16 @@ const breadcrumbs = {
   <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
   <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbs)} />
 
-  <Navbar client:load />
+  <Navbar client:load pathname={Astro.url.pathname} />
   <main>
-    <article class="container post">
+    <article class="container post" id="post" data-text={JSON.stringify(scriptText)}>
       <header class="post-head">
-        <nav class="post-head__crumbs" aria-label="Breadcrumb">
-          <a href="/blog">Blog</a>
+        <nav class="post-head__crumbs" aria-label={t('post.breadcrumb')}>
+          <a href={`${base}/blog`}>Blog</a>
           {post.data.tags[0] && (
             <>
               <span aria-hidden="true">/</span>
-              <a href={`/blog?tag=${slugify(post.data.tags[0])}`}>{post.data.tags[0]}</a>
+              <a href={`${base}/blog?tag=${slugify(post.data.tags[0])}`}>{post.data.tags[0]}</a>
             </>
           )}
         </nav>
@@ -121,7 +140,7 @@ const breadcrumbs = {
             <span class="post-head__meta">
               <time datetime={post.data.date.toISOString()}>{dateFormatter.format(post.data.date)}</time>
               <span aria-hidden="true">·</span>
-              {minutes} min read
+              {minutes} {t('blog.minRead')}
             </span>
           </div>
         </div>
@@ -131,7 +150,7 @@ const breadcrumbs = {
         <div class="post__content">
           {toc.length > 2 && (
             <details class="toc-mobile">
-              <summary>On this page</summary>
+              <summary>{t('post.onThisPage')}</summary>
               <ol>
                 {toc.map(h => (
                   <li class={`toc__item toc__item--h${h.depth}`}>
@@ -149,39 +168,36 @@ const breadcrumbs = {
           <footer class="post-end">
             <div class="post-end__tags">
               {post.data.tags.map(tag => (
-                <a class="tag" href={`/blog?tag=${slugify(tag)}`}>#{tag}</a>
+                <a class="tag" href={`${base}/blog?tag=${slugify(tag)}`}>#{tag}</a>
               ))}
             </div>
 
             <div class="author-card">
               <Image class="author-card__avatar" src={avatar} alt="Cristhian Wiki" width={128} height={128} />
               <div>
-                <p class="author-card__label">Written by</p>
+                <p class="author-card__label">{t('post.writtenBy')}</p>
                 <p class="author-card__name">Cristhian Wiki</p>
-                <p class="author-card__bio">
-                  Senior Machine Learning Engineer. I write about the models I build, the bugs that
-                  cost me a weekend, and whatever I am currently learning the hard way.
-                </p>
+                <p class="author-card__bio">{t('post.bio')}</p>
                 <div class="author-card__links">
                   <a href="https://github.com/HiroForYou" target="_blank" rel="noopener noreferrer">GitHub</a>
                   <a href="https://www.linkedin.com/in/cristhian-wiki/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                  <a href="/#contact">Get in touch</a>
+                  <a href={`${base}/#contact`}>{t('post.getInTouch')}</a>
                 </div>
               </div>
             </div>
 
             {(newer || older) && (
-              <nav class="post-nav" aria-label="More posts">
+              <nav class="post-nav" aria-label={t('post.morePosts')}>
                 {older ? (
-                  <a class="post-nav__link" href={`/blog/${older.slug}/`}>
-                    <span class="post-nav__dir">← Previous</span>
+                  <a class="post-nav__link" href={`${base}/blog/${entrySlug(older)}/`}>
+                    <span class="post-nav__dir">{t('post.previous')}</span>
                     <span class="post-nav__title">{older.data.title}</span>
                     <span class="post-nav__date">{shortDate.format(older.data.date)}</span>
                   </a>
                 ) : <span />}
                 {newer && (
-                  <a class="post-nav__link post-nav__link--next" href={`/blog/${newer.slug}/`}>
-                    <span class="post-nav__dir">Next →</span>
+                  <a class="post-nav__link post-nav__link--next" href={`${base}/blog/${entrySlug(newer)}/`}>
+                    <span class="post-nav__dir">{t('post.next')}</span>
                     <span class="post-nav__title">{newer.data.title}</span>
                     <span class="post-nav__date">{shortDate.format(newer.data.date)}</span>
                   </a>
@@ -190,20 +206,20 @@ const breadcrumbs = {
             )}
 
             <a class="post-end__edit" href={githubEditUrl} target="_blank" rel="noopener noreferrer">
-              Spotted a typo? Edit this post on GitHub ↗
+              {t('post.edit')}
             </a>
           </footer>
 
-          <section class="post__comments" aria-label="Comments">
-            <h2 class="post__comments-title">Comments</h2>
+          <section class="post__comments" aria-label={t('post.comments')}>
+            <h2 class="post__comments-title">{t('post.comments')}</h2>
             <div id="disqus_thread"></div>
           </section>
         </div>
 
         <aside class="post-aside">
           {toc.length > 2 && (
-            <nav class="toc" aria-label="On this page">
-              <p class="post-aside__label">On this page</p>
+            <nav class="toc" aria-label={t('post.onThisPage')}>
+              <p class="post-aside__label">{t('post.onThisPage')}</p>
               <ol>
                 {toc.map(h => (
                   <li class={`toc__item toc__item--h${h.depth}`}>
@@ -215,18 +231,18 @@ const breadcrumbs = {
           )}
 
           <div class="share">
-            <p class="post-aside__label">Share</p>
+            <p class="post-aside__label">{t('post.share')}</p>
             <div class="share__row">
-              <a href={shareLinks.x} target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+              <a href={shareLinks.x} target="_blank" rel="noopener noreferrer" aria-label={`${t('post.shareOn')} X`}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.75 3h3.07l-6.71 7.67L22 21h-6.18l-4.84-6.33L5.44 21H2.37l7.18-8.2L2 3h6.33l4.38 5.79L17.75 3Zm-1.08 16.18h1.7L7.4 4.73H5.58l11.09 14.45Z" /></svg>
               </a>
-              <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn">
+              <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`${t('post.shareOn')} LinkedIn`}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.83v1.54h.06c.53-1 1.84-2.06 3.78-2.06 4.05 0 4.8 2.66 4.8 6.12V21h-4v-4.98c0-1.19-.02-2.72-1.66-2.72-1.66 0-1.91 1.3-1.91 2.63V21h-4V9.75Z" /></svg>
               </a>
-              <a href={shareLinks.reddit} target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit">
+              <a href={shareLinks.reddit} target="_blank" rel="noopener noreferrer" aria-label={`${t('post.shareOn')} Reddit`}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.3a2.2 2.2 0 0 0-3.7-1.6 10.7 10.7 0 0 0-5.6-1.7l1-4.5 3.2.7a1.5 1.5 0 1 0 .2-.9l-3.6-.8a.5.5 0 0 0-.6.4l-1.1 5a10.7 10.7 0 0 0-5.7 1.7A2.2 2.2 0 0 0 2 12.3c0 .8.4 1.5 1 1.9v.4c0 3 3.5 5.4 7.9 5.4s7.9-2.4 7.9-5.4v-.4c.6-.4 1.2-1.1 1.2-1.9ZM8 13.6a1.2 1.2 0 1 1 2.4 0 1.2 1.2 0 0 1-2.4 0Zm7.6 3a5.9 5.9 0 0 1-3.6 1c-1.3 0-2.6-.3-3.6-1a.4.4 0 0 1 .5-.6c.9.6 2 .9 3.1.9s2.2-.3 3.1-.9a.4.4 0 0 1 .5.6Zm-.3-1.8a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z" /></svg>
               </a>
-              <button type="button" class="share__copy" data-copy-url={postUrl} aria-label="Copy link">
+              <button type="button" class="share__copy" data-copy-url={postUrl} aria-label={t('post.copyLink')}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5" /><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" /></svg>
                 <span class="share__copied" aria-live="polite"></span>
               </button>
@@ -237,7 +253,7 @@ const breadcrumbs = {
     </article>
   </main>
 
-  <button id="back-to-top" class="back-to-top" aria-label="Back to top" type="button">
+  <button id="back-to-top" class="back-to-top" aria-label={t('post.backToTop')} type="button">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6" />
     </svg>
@@ -291,12 +307,14 @@ const breadcrumbs = {
     window.addEventListener('scroll', updateToc, { passive: true });
   }
 
+  const text = JSON.parse(document.getElementById('post')?.dataset.text ?? '{}');
+
   // Hover anchors on headings, so any section can be linked directly.
   document.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]').forEach(heading => {
     const anchor = document.createElement('a');
     anchor.href = `#${heading.id}`;
     anchor.className = 'heading-anchor';
-    anchor.setAttribute('aria-label', `Link to “${heading.textContent}”`);
+    anchor.setAttribute('aria-label', `${text.linkTo} “${heading.textContent}”`);
     anchor.textContent = '#';
     heading.appendChild(anchor);
   });
@@ -316,15 +334,15 @@ const breadcrumbs = {
     const copy = document.createElement('button');
     copy.type = 'button';
     copy.className = 'code-block__copy';
-    copy.textContent = 'Copy';
+    copy.textContent = text.copy;
     copy.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(pre.innerText);
-        copy.textContent = 'Copied';
+        copy.textContent = text.copied;
       } catch {
-        copy.textContent = 'Failed';
+        copy.textContent = text.failed;
       }
-      setTimeout(() => (copy.textContent = 'Copy'), 1600);
+      setTimeout(() => (copy.textContent = text.copy), 1600);
     });
     bar.appendChild(copy);
     wrapper.prepend(bar);
@@ -336,9 +354,9 @@ const breadcrumbs = {
     button.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(button.dataset.copyUrl ?? location.href);
-        if (label) label.textContent = 'Link copied';
+        if (label) label.textContent = text.linkCopied;
       } catch {
-        if (label) label.textContent = 'Copy failed';
+        if (label) label.textContent = text.copyFailed;
       }
       setTimeout(() => label && (label.textContent = ''), 1800);
     });
@@ -347,7 +365,9 @@ const breadcrumbs = {
 
 <script define:vars={{
   shortname: 'https-hiroforyou-github-io-cristhian',
-  identifier: post.slug,
+  // English threads keep their original identifier (the bare slug);
+  // Spanish posts get their own thread under "es/slug".
+  identifier: post.id,
   url: postUrl,
   title: post.data.title,
 }}>

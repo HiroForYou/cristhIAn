@@ -3,13 +3,17 @@ import { Image } from 'astro:assets';
 import Layout from '@/layouts/Layout.astro';
 import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
-import { getCollection } from 'astro:content';
 import { slugify } from '@/utils/slugify.js';
 import { readingTime } from '@/utils/readingTime.js';
+import { getPosts, entrySlug } from '@/utils/content.js';
+import { basePath, dateLocale, getLang, localeParams, useTranslations } from '@/i18n';
 
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+export const getStaticPaths = localeParams;
+
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
+const base = basePath(lang);
+const posts = await getPosts(lang);
 
 const allTags = Array.from(new Set(posts.flatMap(post => post.data.tags))).sort((a, b) =>
   a.localeCompare(b)
@@ -19,7 +23,7 @@ const VISIBLE_TAG_LIMIT = 8;
 const visibleTags = allTags.slice(0, VISIBLE_TAG_LIMIT);
 const overflowTags = allTags.slice(VISIBLE_TAG_LIMIT);
 
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
+const dateFormatter = new Intl.DateTimeFormat(dateLocale[lang], {
   year: 'numeric',
   month: 'short',
   day: 'numeric',
@@ -38,51 +42,44 @@ const lastUpdated = new Date(
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'Blog',
-  '@id': `${SITE}/blog/#blog`,
+  '@id': `${SITE}${base}/blog/#blog`,
   name: 'Cristhian Wiki — Blog',
-  description:
-    'Notes on machine learning engineering, MLOps, and the side projects I build along the way.',
-  url: `${SITE}/blog/`,
-  inLanguage: 'en',
+  description: t('blog.description'),
+  url: `${SITE}${base}/blog/`,
+  inLanguage: lang,
   dateModified: lastUpdated.toISOString(),
   author: { '@id': `${SITE}/#person` },
   publisher: { '@id': `${SITE}/#person` },
   isPartOf: { '@id': `${SITE}/#website` },
   blogPost: posts.map(post => ({
     '@type': 'BlogPosting',
-    '@id': `${SITE}/blog/${post.slug}/#article`,
+    '@id': `${SITE}${base}/blog/${entrySlug(post)}/#article`,
     headline: post.data.title,
-    url: `${SITE}/blog/${post.slug}/`,
+    url: `${SITE}${base}/blog/${entrySlug(post)}/`,
     datePublished: post.data.date.toISOString(),
     dateModified: (post.data.updated ?? post.data.date).toISOString(),
   })),
 };
 ---
 
-<Layout
-  title="Blog — Cristhian Wiki"
-  description="Notes on machine learning engineering, MLOps, and the side projects I build along the way."
->
+<Layout title={t('blog.title')} description={t('blog.description')}>
   <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
-  <Navbar client:load />
+  <Navbar client:load pathname={Astro.url.pathname} />
   <main>
     <section class="container blog-index">
       <header class="blog-hero">
-        <p class="eyebrow">Writing</p>
-        <h1 class="blog-hero__title">Notes from the <em>workbench.</em></h1>
-        <p class="blog-hero__intro">
-          Machine learning, side projects, and the bugs that taught me the most. Long-form write-ups
-          of things I built, broke, and eventually understood.
-        </p>
-        <a class="blog-hero__rss" href="/rss.xml">
+        <p class="eyebrow">{t('blog.eyebrow')}</p>
+        <h1 class="blog-hero__title" set:html={t('blog.heading')} />
+        <p class="blog-hero__intro">{t('blog.intro')}</p>
+        <a class="blog-hero__rss" href={`${base}/rss.xml`}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9" /><path d="M4 4a16 16 0 0 1 16 16" /><circle cx="5" cy="19" r="1" /></svg>
-          Subscribe via RSS
+          {t('blog.rss')}
         </a>
       </header>
 
       {
         featured && (
-          <a class="featured" href={`/blog/${featured.slug}/`} id="blog-featured">
+          <a class="featured" href={`${base}/blog/${entrySlug(featured)}/`} id="blog-featured">
             {featured.data.cover && (
               <div class="featured__media">
                 <Image
@@ -95,14 +92,14 @@ const structuredData = {
               </div>
             )}
             <div class="featured__body">
-              <span class="featured__badge">Latest</span>
+              <span class="featured__badge">{t('blog.latest')}</span>
               <h2 class="featured__title">{featured.data.title}</h2>
               {featured.data.excerpt && <p class="featured__excerpt">{featured.data.excerpt}</p>}
               <p class="post-meta">
-                {dateFormatter.format(featured.data.date)} · {readingTime(featured.body)} min read
+                {dateFormatter.format(featured.data.date)} · {readingTime(featured.body)} {t('blog.minRead')}
               </p>
               <span class="featured__cta">
-                Read the post
+                {t('blog.readPost')}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </span>
             </div>
@@ -112,7 +109,7 @@ const structuredData = {
 
       <div class="blog-toolbar">
         <div class="blog-controls__tags" id="blog-tag-filter">
-          <button type="button" class="chip is-active" data-tag="all">All</button>
+          <button type="button" class="chip is-active" data-tag="all">{t('blog.all')}</button>
           {
             visibleTags.map(tag => (
               <button type="button" class="chip" data-tag={slugify(tag)}>
@@ -129,8 +126,8 @@ const structuredData = {
           }
           {
             overflowTags.length > 0 && (
-              <button type="button" class="chip blog-controls__more" id="blog-tags-more">
-                +{overflowTags.length} more
+              <button type="button" class="chip blog-controls__more" id="blog-tags-more" data-less={t('blog.showLess')}>
+                +{overflowTags.length} {t('blog.more')}
               </button>
             )
           }
@@ -141,7 +138,7 @@ const structuredData = {
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
-          <input type="search" id="blog-search-input" placeholder="Search posts…" autocomplete="off" />
+          <input type="search" id="blog-search-input" placeholder={t('blog.search')} autocomplete="off" />
         </label>
       </div>
 
@@ -159,13 +156,13 @@ const structuredData = {
               </time>
               <div class="post-row__body">
                 <h2 class="post-row__title">
-                  <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                  <a href={`${base}/blog/${entrySlug(post)}/`}>{post.data.title}</a>
                 </h2>
                 {post.data.excerpt && <p class="post-row__excerpt">{post.data.excerpt}</p>}
                 <div class="post-row__foot">
-                  <span class="post-meta">{readingTime(post.body)} min read</span>
+                  <span class="post-meta">{readingTime(post.body)} {t('blog.minRead')}</span>
                   {post.data.tags.map(tag => (
-                    <a class="tag" href={`/blog?tag=${slugify(tag)}`}>
+                    <a class="tag" href={`${base}/blog?tag=${slugify(tag)}`}>
                       {tag}
                     </a>
                   ))}
@@ -182,7 +179,7 @@ const structuredData = {
       </ul>
 
       <p class="blog-index__empty" id="blog-empty" hidden>
-        Nothing matches that yet. Try another tag or a broader search.
+        {t('blog.empty')}
       </p>
     </section>
   </main>
@@ -631,7 +628,7 @@ const structuredData = {
     overflowTagButtons.forEach(button => {
       button.hidden = !expanding;
     });
-    moreButton.textContent = expanding ? 'Show less' : moreLabel;
+    moreButton.textContent = expanding ? (moreButton.dataset.less ?? '') : moreLabel;
   });
 
   // Landing here via a tag link (e.g. /blog?tag=python from a post's sidebar
@@ -645,7 +642,7 @@ const structuredData = {
         overflowTagButtons.forEach(button => {
           button.hidden = false;
         });
-        if (moreButton) moreButton.textContent = 'Show less';
+        if (moreButton) moreButton.textContent = moreButton.dataset.less ?? '';
       }
       activeTag = requestedTag;
       tagButtons.forEach(button => button.classList.toggle('is-active', button === targetButton));

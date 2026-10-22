@@ -1,27 +1,28 @@
 ---
 import { experience } from '@/data/experience.js';
+import { getLang, pick, useTranslations } from '@/i18n';
+
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
 
 // Roles on one spine, oldest first.
 const stops = experience
-  .map(entry => {
-    const [period, location] = entry.dateRange.split(' · ');
-    return {
-      start: entry.start,
-      period,
-      title: entry.role,
-      place: entry.company,
-      sub: location,
-      current: period.includes('Present'),
-      bullets: entry.bullets,
-    };
-  })
+  .map(entry => ({
+    start: entry.start,
+    period: pick(entry.period, lang),
+    title: pick(entry.role, lang),
+    place: entry.company,
+    sub: pick(entry.location, lang),
+    current: Boolean(entry.current),
+    bullets: pick(entry.bullets, lang),
+  }))
   .sort((a, b) => a.start.localeCompare(b.start));
 ---
 
 <section id="experience">
   <div class="container">
-    <p class="eyebrow"><b>02</b>Career experience</p>
-    <h2 class="section-title">The path so <em>far.</em></h2>
+    <p class="eyebrow"><b>02</b>{t('exp.eyebrow')}</p>
+    <h2 class="section-title" set:html={t('exp.title')} />
 
     <div class="tl" id="timeline">
       <span class="tl-spine" aria-hidden="true"></span>
@@ -44,7 +45,7 @@ const stops = experience
                 {stop.current && (
                   <p class="st-status">
                     <b aria-hidden="true" />
-                    Current role
+                    {t('exp.current')}
                   </p>
                 )}
                 <ul>
@@ -55,15 +56,15 @@ const stops = experience
           ))
         }
         <li class="st st-next">
-          <div class="st-year"><b>Next</b></div>
+          <div class="st-year"><b>{t('exp.next')}</b></div>
           <span class="st-dot" aria-hidden="true"></span>
           <div class="st-body">
             <a href="#contact" class="nxt">
               <p>
-                <small>Next stop</small>
-                Your <em>team?</em>
+                <small>{t('exp.nextStop')}</small>
+                <Fragment set:html={t('exp.yourTeam')} />
               </p>
-              <span class="btn btn-primary">Let's talk ↗</span>
+              <span class="btn btn-primary">{t('exp.talk')}</span>
             </a>
           </div>
         </li>

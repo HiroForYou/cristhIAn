@@ -1,11 +1,15 @@
 ---
 import { education, achievements, certificates, presentations } from '@/data/education.js';
+import { getLang, pick, useTranslations } from '@/i18n';
+
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
 ---
 
 <section id="education">
   <div class="container">
-    <p class="eyebrow"><b>03</b>Education & achievements</p>
-    <h2 class="section-title">Always <em>learning.</em></h2>
+    <p class="eyebrow"><b>03</b>{t('edu.eyebrow')}</p>
+    <h2 class="section-title" set:html={t('edu.title')} />
 
     <div class="edu-grid">
       <div class="card edu-block">
@@ -14,23 +18,23 @@ import { education, achievements, certificates, presentations } from '@/data/edu
             <path d="M22 9 12 4 2 9l10 5 10-5Z" />
             <path d="M6 11v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
           </svg>
-          Education
+          {t('edu.education')}
         </h3>
         <ul class="edu-list">
           {
             education.map(entry => (
               <li>
                 <div class="edu-list__head">
-                  <p class="edu-list__title">{entry.degree}</p>
+                  <p class="edu-list__title">{pick(entry.degree, lang)}</p>
                   <span class="edu-list__date">{entry.dateRange}</span>
                 </div>
                 <p class="edu-list__meta">
                   {entry.href ? (
                     <a href={entry.href} target="_blank" rel="noopener noreferrer">
-                      {entry.institution}
+                      {pick(entry.institution, lang)}
                     </a>
                   ) : (
-                    entry.institution
+                    pick(entry.institution, lang)
                   )}
                 </p>
               </li>
@@ -45,14 +49,14 @@ import { education, achievements, certificates, presentations } from '@/data/edu
             <path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" />
             <path d="m9 14-1.5 6.5L12 18l4.5 2.5L15 14" />
           </svg>
-          Achievements
+          {t('edu.achievements')}
         </h3>
         <ul class="edu-list">
           {
             achievements.map(item => (
               <li>
                 <span class="edu-list__date edu-list__date--block">{item.dateRange}</span>
-                <p class="edu-list__meta edu-list__meta--plain">{item.text}</p>
+                <p class="edu-list__meta edu-list__meta--plain">{pick(item.text, lang)}</p>
               </li>
             ))
           }
@@ -66,7 +70,7 @@ import { education, achievements, certificates, presentations } from '@/data/edu
           <path d="M6 9a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z" />
           <path d="m9 14.5-1 6 4-2 4 2-1-6" />
         </svg>
-        Certificates
+        {t('edu.certificates')}
       </h3>
       <ul class="edu-cert-list">
         {
@@ -91,16 +95,16 @@ import { education, achievements, certificates, presentations } from '@/data/edu
           <rect x="9" y="2" width="6" height="12" rx="3" />
           <path d="M5 11a7 7 0 0 0 14 0M12 18v4M9 22h6" />
         </svg>
-        Presentations
+        {t('edu.presentations')}
       </h3>
       <ul class="edu-presentations">
         {
           presentations.map(talk => (
             <li>
-              <span class="edu-presentations__date">{talk.date}</span>
+              <span class="edu-presentations__date">{pick(talk.date, lang)}</span>
               <span class="edu-presentations__body">
                 <a href={talk.href} target="_blank" rel="noopener noreferrer">
-                  {talk.title}
+                  {pick(talk.title, lang)}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M7 17 17 7M9 7h8v8" />
                   </svg>

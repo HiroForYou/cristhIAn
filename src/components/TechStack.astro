@@ -1,5 +1,9 @@
 ---
 import { techStack } from '@/data/techstack.js';
+import { getLang, pick, useTranslations } from '@/i18n';
+
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
 
 const wordCloud = [
   { text: 'TensorFlow', top: '5%', left: '78%', size: '1.3rem' },
@@ -24,17 +28,17 @@ const wordCloud = [
   </div>
 
   <div class="container">
-    <p class="eyebrow"><b>04</b>Tech stack</p>
-    <h2 class="section-title">Tools of the <em>trade.</em></h2>
+    <p class="eyebrow"><b>04</b>{t('stack.eyebrow')}</p>
+    <h2 class="section-title" set:html={t('stack.title')} />
 
     <div class="tech-grid">
       {
         techStack.map(group => (
           <div class="tech-group card">
-            <h3>{group.category}</h3>
+            <h3>{pick(group.category, lang)}</h3>
             <div class="tech-group__items">
               {group.items.map(item => (
-                <span class="tag">{item}</span>
+                <span class="tag">{pick(item, lang)}</span>
               ))}
             </div>
           </div>

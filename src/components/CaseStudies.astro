@@ -1,7 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCaseStudies, entrySlug } from '@/utils/content.js';
+import { basePath, getLang, useTranslations } from '@/i18n';
 
-const studies = (await getCollection('caseStudies')).sort((a, b) => a.data.order - b.data.order);
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
+const studies = await getCaseStudies(lang);
 
 const withProtocol = url => (url.startsWith('//') ? `https:${url}` : url);
 ---
@@ -40,14 +43,14 @@ const withProtocol = url => (url.startsWith('//') ? `https:${url}` : url);
             ))}
           </div>
           <div class="case-study__links">
-            <a class="btn btn-primary" href={`/case-studies/${study.slug}/`}>
-              Case Study
+            <a class="btn btn-primary" href={`${basePath(lang)}/case-studies/${entrySlug(study)}/`}>
+              {t('projects.caseStudy')}
             </a>
             <a class="btn btn-secondary" href={withProtocol(study.data.demo)} target="_blank" rel="noopener noreferrer">
-              Live Demo
+              {t('projects.liveDemo')}
             </a>
             <a class="btn btn-secondary" href={withProtocol(study.data.src)} target="_blank" rel="noopener noreferrer">
-              Source
+              {t('projects.source')}
             </a>
           </div>
         </div>

@@ -1,13 +1,17 @@
 ---
 import smallProjects from '@/data/smallprojects.json';
+import { getLang, pick, useTranslations } from '@/i18n';
+
+const lang = getLang(Astro.url.pathname);
+const t = useTranslations(lang);
 ---
 
-<div class="small-projects" id="small-projects-carousel">
+<div class="small-projects" id="small-projects-carousel" data-page-label={t('projects.goToPage')}>
   <div class="small-projects__skew" aria-hidden="true"></div>
 
   <div class="container">
-    <p class="eyebrow">More to explore</p>
-    <h3 class="small-projects__title">Small Projects</h3>
+    <p class="eyebrow">{t('projects.more')}</p>
+    <h3 class="small-projects__title">{t('projects.small')}</h3>
   </div>
 
   <div class="carousel">
@@ -16,14 +20,14 @@ import smallProjects from '@/data/smallprojects.json';
         smallProjects.map(project => (
           <div class="carousel__slide">
             <div class="card small-project">
-              <h4>{project.title}</h4>
-              <p>{project.description}</p>
+              <h4>{pick(project.title, lang)}</h4>
+              <p>{pick(project.description, lang)}</p>
               <div class="small-project__links">
                 <a class="btn btn-primary" href={project.links.demo} target="_blank" rel="noopener noreferrer">
-                  Demo
+                  {t('projects.demo')}
                 </a>
                 <a class="btn btn-secondary" href={project.links.src} target="_blank" rel="noopener noreferrer">
-                  Source
+                  {t('projects.source')}
                 </a>
               </div>
             </div>
@@ -189,7 +193,7 @@ import smallProjects from '@/data/smallprojects.json';
       const dot = document.createElement('button');
       dot.type = 'button';
       dot.className = 'carousel__dot';
-      dot.setAttribute('aria-label', `Go to page ${i + 1}`);
+      dot.setAttribute('aria-label', `${root?.dataset.pageLabel ?? 'Go to page'} ${i + 1}`);
       dot.addEventListener('click', () => {
         setActivePage(i);
         goToPage(i);

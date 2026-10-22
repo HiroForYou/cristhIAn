@@ -4,18 +4,31 @@ import Navbar from '@/components/Navbar.jsx';
 import Footer from '@/components/Footer.astro';
 ---
 
-<Layout title="404 — Cristhian Wiki">
+<Layout title="404 — Cristhian Wiki" translated={false}>
   <Navbar client:load />
   <main>
     <section class="container not-found">
       <p class="eyebrow">404</p>
-      <h1>Page not found</h1>
-      <p>The page you're looking for doesn't exist.</p>
-      <a class="btn btn-primary" href="/">Back home</a>
+      <h1 id="nf-title">Page not found</h1>
+      <p id="nf-text">The page you're looking for doesn't exist.</p>
+      <a class="btn btn-primary" id="nf-home" href="/">Back home</a>
     </section>
   </main>
   <Footer />
 </Layout>
+
+<script is:inline>
+  // The host serves this one page for every missing URL, so a missing
+  // Spanish page swaps the message to Spanish on the fly.
+  if (/^\/es(\/|$)/.test(location.pathname)) {
+    document.documentElement.lang = 'es';
+    document.getElementById('nf-title').textContent = 'Página no encontrada';
+    document.getElementById('nf-text').textContent = 'La página que buscas no existe.';
+    const home = document.getElementById('nf-home');
+    home.textContent = 'Volver al inicio';
+    home.setAttribute('href', '/es/');
+  }
+</script>
 
 <style>
   .not-found {
