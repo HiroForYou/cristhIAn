@@ -43,6 +43,15 @@ for (const { prefix } of LOCALES) {
 
 export default defineConfig({
   site: SITE,
+  // URLs from the old Gatsby site that Google still has on file. GitHub
+  // Pages can't send server redirects, so Astro emits small pages that
+  // redirect (meta refresh + canonical) to the new location.
+  redirects: {
+    '/blog/tags/python': '/blog/?tag=python',
+    '/blog/tags/pytorch': '/blog/?tag=pytorch',
+    '/blog/tags/tensorflow': '/blog/?tag=tensorflow',
+    '/case-studies/blood-cells-detection-system': '/case-studies/blood-cells-detection/',
+  },
   integrations: [
     react(),
     sitemap({

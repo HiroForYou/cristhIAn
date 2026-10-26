@@ -162,7 +162,7 @@ const structuredData = {
                 <div class="post-row__foot">
                   <span class="post-meta">{readingTime(post.body)} {t('blog.minRead')}</span>
                   {post.data.tags.map(tag => (
-                    <a class="tag" href={`${base}/blog?tag=${slugify(tag)}`}>
+                    <a class="tag" href={`${base}/blog/?tag=${slugify(tag)}`}>
                       {tag}
                     </a>
                   ))}
@@ -631,7 +631,7 @@ const structuredData = {
     moreButton.textContent = expanding ? (moreButton.dataset.less ?? '') : moreLabel;
   });
 
-  // Landing here via a tag link (e.g. /blog?tag=python from a post's sidebar
+  // Landing here via a tag link (e.g. /blog/?tag=python from a post's sidebar
   // or another post's tag chip) pre-selects that filter instead of just
   // dropping the visitor on the unfiltered list.
   const requestedTag = new URLSearchParams(window.location.search).get('tag');

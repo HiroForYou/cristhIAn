@@ -121,11 +121,11 @@ const breadcrumbs = {
     <article class="container post" id="post" data-text={JSON.stringify(scriptText)}>
       <header class="post-head">
         <nav class="post-head__crumbs" aria-label={t('post.breadcrumb')}>
-          <a href={`${base}/blog`}>Blog</a>
+          <a href={`${base}/blog/`}>Blog</a>
           {post.data.tags[0] && (
             <>
               <span aria-hidden="true">/</span>
-              <a href={`${base}/blog?tag=${slugify(post.data.tags[0])}`}>{post.data.tags[0]}</a>
+              <a href={`${base}/blog/?tag=${slugify(post.data.tags[0])}`}>{post.data.tags[0]}</a>
             </>
           )}
         </nav>
@@ -168,7 +168,7 @@ const breadcrumbs = {
           <footer class="post-end">
             <div class="post-end__tags">
               {post.data.tags.map(tag => (
-                <a class="tag" href={`${base}/blog?tag=${slugify(tag)}`}>#{tag}</a>
+                <a class="tag" href={`${base}/blog/?tag=${slugify(tag)}`}>#{tag}</a>
               ))}
             </div>
 

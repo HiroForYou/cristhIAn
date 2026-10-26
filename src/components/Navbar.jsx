@@ -8,7 +8,7 @@ const navItems = [
   { path: '/#experience', key: 'nav.experience' },
   { path: '/#education', key: 'nav.education' },
   { path: '/#projects', key: 'nav.projects' },
-  { path: '/blog', key: 'nav.blog' },
+  { path: '/blog/', key: 'nav.blog' },
   { path: '/#contact', key: 'nav.contact' },
 ];
 
@@ -70,7 +70,7 @@ const sectionIds = navItems.map(item => item.path.split('#')[1]).filter(Boolean)
 // Pages outside the home page highlight the link they belong to: the blog
 // and its posts light up "Blog", case studies belong under "Projects".
 const routeLinks = [
-  { prefix: '/blog', path: '/blog' },
+  { prefix: '/blog', path: '/blog/' },
   { prefix: '/case-studies', path: '/#projects' },
 ];
 const linkPathFor = pathname => {
