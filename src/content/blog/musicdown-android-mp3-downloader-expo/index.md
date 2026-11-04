@@ -9,6 +9,11 @@ seoTitle: 'MusicDown: Expo MP3 Downloader & Android 14 Permission Bug'
 seoDescription: "How I built an Expo app that turns a YouTube link into a tagged MP3, and fixed expo-media-library's silent write failures on Android 14."
 ---
 
+> **Update, November 2026:** MusicDown has changed a lot since this post: a full redesign, Spotify
+> likes, a global player with lock-screen controls, and home-screen widgets. The screenshots below
+> show the first version. The story continues in
+> [MusicDown, four months later](/blog/musicdown-v2-expo-audio-player-spotify-likes/).
+
 I take the same commute most days, and it's the same story every time: signal drops the second
 the bus goes underground, and whatever I was streaming stutters to a halt. I've been meaning to
 fix this properly for months — not with another app that "caches for offline" behind a

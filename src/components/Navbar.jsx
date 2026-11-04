@@ -61,6 +61,10 @@ const ModeToggle = ({ mode, onToggle, t }) => (
   </button>
 );
 
+// useLayoutEffect warns during server rendering; fall back to useEffect there
+// (it never runs on the server anyway) and keep the layout timing in the browser.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 // Reading progress bar along the top edge; temporarily turned off.
 const SHOW_PROGRESS = false;
 
@@ -182,7 +186,7 @@ const Navbar = ({ pathname = '/' }) => {
     [activeHref]
   );
 
-  useLayoutEffect(() => placeIndicator(), [placeIndicator]);
+  useIsomorphicLayoutEffect(() => placeIndicator(), [placeIndicator]);
   useEffect(() => {
     const placeInstantly = () => placeIndicator(true);
     window.addEventListener('resize', placeInstantly);

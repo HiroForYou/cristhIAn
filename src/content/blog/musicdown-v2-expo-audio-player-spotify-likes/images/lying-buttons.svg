@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <style>
+    .title { fill: #14212B; font-family: Fraunces, Georgia, 'Times New Roman', serif; font-size: 17px; font-weight: 600; }
+    .sub { fill: #4A5963; font-size: 12px; }
+    .mono { font-family: ui-monospace, 'JetBrains Mono', Consolas, monospace; font-size: 13px; fill: #14212B; }
+    .head { font-family: ui-monospace, 'JetBrains Mono', Consolas, monospace; font-size: 11px; fill: #8B949B; letter-spacing: 1px; }
+    .hit { fill: #A8420E; font-weight: 700; }
+    .blink { animation: blink 2.4s ease-in-out infinite; }
+    @keyframes blink { 0%, 60%, 100% { opacity: 1; } 75% { opacity: .35; } }
+  </style>
+
+  <rect width="900" height="300" fill="#E6E9EA"/>
+
+  <!-- Left: the notification Android draws -->
+  <text class="title" x="40" y="44">What Android draws</text>
+  <rect x="40" y="62" width="300" height="104" rx="14" fill="#14212B"/>
+  <rect x="58" y="78" width="40" height="40" rx="4" fill="#62737F"/>
+  <text x="110" y="94" fill="#FFFFFF" font-family="Fraunces, Georgia, serif" font-size="14" font-weight="600">Rosaura</text>
+  <text x="110" y="112" fill="#CBD0D3" font-size="11.5">Alborada</text>
+  <!-- previous -->
+  <g transform="translate(118,140)" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linejoin="round">
+    <path d="M8,-8 L-4,0 L8,8 Z"/><path d="M-8,-8 V8"/>
+  </g>
+  <!-- pause -->
+  <g transform="translate(190,140)" stroke="#FFFFFF" stroke-width="2.4">
+    <path d="M-4,-8 V8 M4,-8 V8"/>
+  </g>
+  <!-- next -->
+  <g class="blink" transform="translate(262,140)" stroke="#E07A45" stroke-width="2" fill="none" stroke-linejoin="round">
+    <path d="M-8,-8 L4,0 L-8,8 Z"/><path d="M8,-8 V8"/>
+  </g>
+
+  <text class="sub" x="40" y="196">icon:</text>
+  <text class="mono" x="100" y="196">ICON_NEXT</text>
+  <text class="sub" x="40" y="218">command:</text>
+  <text class="mono" x="100" y="218">SEEK_FORWARD (+10 s)</text>
+  <text class="sub" x="40" y="252">The patch swaps the icon.</text>
+  <text class="sub" x="40" y="270">The command underneath stays a seek.</text>
+
+  <!-- Right: what the app sees -->
+  <text class="title" x="400" y="44">What the app sees, once a second</text>
+  <text class="head" x="400" y="80">WALL CLOCK</text>
+  <text class="head" x="520" y="80">POSITION</text>
+  <text class="head" x="630" y="80">JUMP</text>
+  <line x1="400" y1="90" x2="860" y2="90" stroke="#CBD0D3"/>
+
+  <text class="mono" x="400" y="116">12:04:00</text><text class="mono" x="520" y="116">42.0 s</text><text class="mono" x="630" y="116">  —</text>
+  <text class="mono" x="400" y="142">12:04:01</text><text class="mono" x="520" y="142">43.0 s</text><text class="mono" x="630" y="142"> 0.0</text>
+  <text class="mono" x="400" y="168">12:04:02</text><text class="mono" x="520" y="168">44.0 s</text><text class="mono" x="630" y="168"> 0.0</text>
+  <rect x="392" y="178" width="476" height="30" rx="4" fill="#A8420E" fill-opacity="0.1"/>
+  <text class="mono" x="400" y="198">12:04:03</text><text class="mono hit" x="520" y="198">55.0 s</text><text class="mono hit" x="630" y="198">+10.0</text>
+  <text class="mono hit" x="710" y="198">→ next()</text>
+
+  <line x1="400" y1="222" x2="860" y2="222" stroke="#CBD0D3"/>
+  <text class="mono" x="400" y="250" style="font-size:12px">jump = pos − prevPos − elapsed</text>
+  <text class="sub" x="400" y="272">6 s ≤ |jump| &lt; 20 s, and the app didn't seek itself → a track button was pressed.</text>
+</svg>

@@ -9,6 +9,11 @@ seoTitle: 'MusicDown: descargador MP3 con Expo y el bug de Android 14'
 seoDescription: "Cómo hice una app con Expo que convierte un link de YouTube en un MP3 etiquetado, y arreglé los fallos silenciosos de expo-media-library en Android 14."
 ---
 
+> **Actualización, noviembre de 2026:** MusicDown cambió mucho desde este post: un rediseño
+> completo, likes de Spotify, un reproductor global con controles en la pantalla de bloqueo y
+> widgets en la pantalla de inicio. Las capturas de abajo muestran la primera versión. La historia
+> sigue en [MusicDown, cuatro meses después](/es/blog/musicdown-v2-expo-audio-player-spotify-likes/).
+
 Casi todos los días hago el mismo trayecto, y siempre es la misma historia: la señal se cae apenas
 el bus entra a un túnel, y lo que sea que estaba escuchando en streaming se traba hasta detenerse.
 Llevaba meses queriendo resolver esto de verdad; no con otra app que "guarda para escuchar sin
