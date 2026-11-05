@@ -30,8 +30,8 @@
 
   <!-- server check -->
   <rect class="box" x="215" y="165" width="160" height="70" rx="6"/>
-  <text class="title" x="295" y="196" text-anchor="middle">Server alive?</text>
-  <text class="sub mono" x="295" y="216" text-anchor="middle">/api/health · 2.5 s</text>
+  <text class="title" x="295" y="196" text-anchor="middle">Server stream?</text>
+  <text class="sub mono" x="295" y="216" text-anchor="middle">opt-in · health 2.5 s</text>
 
   <!-- /api/stream -->
   <rect class="box" x="425" y="128" width="170" height="64" rx="6"/>
@@ -70,11 +70,11 @@
 
   <!-- online -> /api/stream -->
   <path class="flow" d="M375,188 C400,188 400,160 425,160" stroke="#A8420E" stroke-width="2" fill="none" marker-end="url(#rust)"/>
-  <text class="label" x="398" y="150" text-anchor="middle">yes</text>
+  <text class="label" x="392" y="146" text-anchor="end">on + online</text>
 
   <!-- offline -> WebView -->
   <path class="flow" d="M375,215 C400,215 400,285 425,285" stroke="#A8420E" stroke-width="2" fill="none" marker-end="url(#rust)"/>
-  <text class="label" x="383" y="300" text-anchor="end">no / timeout</text>
+  <text class="label" x="383" y="300" text-anchor="end">default / offline</text>
 
   <!-- /api/stream -> expo-audio -->
   <path class="flow" d="M595,160 C625,160 625,125 645,118" stroke="#A8420E" stroke-width="2" fill="none" marker-end="url(#rust)"/>
