@@ -1,9 +1,10 @@
 ---
 title: 'MusicDown, Four Months Later: One Player, Two Engines, and Buttons That Lie'
 date: 2026-11-04
+updated: 2026-11-05
 author: Cristhian Wiki
 tags: ['expo', 'react-native', 'android', 'spotify', 'design']
-excerpt: 'The MP3 downloader grew into a full music app: a redesign drawn before it was coded, Spotify likes without the Spotify API, a player that switches engines per track, and a few tricks to make the lock screen cooperate.'
+excerpt: 'The MP3 downloader grew into a full music app: a redesign drawn before it was coded, Spotify likes without the Spotify API, a player that switches engines per track, playlists, and a few tricks to make the lock screen cooperate.'
 cover: ./images/two-engines.svg
 seoTitle: 'MusicDown v2: Expo Audio Player, Spotify Likes & Widgets'
 seoDescription: 'How an Expo MP3 downloader became a full music app: Spotify likes via Spicetify, a dual-engine player, lock-screen hacks and Android home-screen widgets.'
@@ -24,11 +25,12 @@ screen, and getting a notification button to do what its icon says.
 | --- | --- | --- |
 | Tabs | Descargar · YouTube · Música · Ajustes | Música · Spotify · Descargar · Ajustes |
 | Look | System fonts, emoji icons, white | Fraunces + Inter, Feather icons, one accent color |
-| Player | Per-screen controls | One global player: mini bar, full screen, queue, shuffle, repeat |
-| Spotify | — | Liked songs synced from my laptop, playable without downloading |
+| Player | Per-screen controls | One global player: mini bar, full screen, lyrics, queue, shuffle, repeat |
+| Spotify | — | Liked songs synced both ways with my laptop, playable without downloading |
+| Library | Downloads only | Playlists and "Me Gustan", backed up to the server |
 | Lock screen | — | Media notification with previous / play / next |
-| Home screen | — | Seven widget variants |
-| Extras | — | Synced lyrics, private downloads, share as `.mp3` |
+| Home screen | — | Nine widget variants |
+| Extras | — | Cover-tinted player, battery saver, offline mode, private downloads |
 
 ## The redesign
 
@@ -93,6 +95,13 @@ It also listens for library `update` events, so a new like is synced three secon
 
 ![The Spotify tab: liked songs synced from the laptop, one of them resolving audio in the mini player](./images/screen-spotify.png)
 
+The sync now works in the other direction too. Deleting a liked song in the app calls
+`DELETE /api/spotify-likes/:id`, and the server adds the id to a list of pending removals. While
+Spotify is open, the extension checks that list every minute (and before each sync), removes
+those songs from my real Spotify library, and confirms to the server. Until that confirmation
+arrives, the server filters the removed ids out of incoming syncs, so a deleted song doesn't come
+back. Removing likes from Spotify can be turned off in the extension's settings.
+
 On the phone the list is cached for offline use. The first version stored it in AsyncStorage,
 which on Android fails to read values larger than about 2 MB, so large libraries stopped loading.
 The cache is now a JSON file in the app's document directory.
@@ -103,31 +112,38 @@ A liked song is just a title and an artist, so the app has to find the audio. I 
 behave like a downloaded song: same mini player, same queue, same lock-screen controls. A single
 `BackgroundPlayerProvider` picks an engine per track:
 
-![Player architecture: downloaded files go straight to expo-audio; Spotify likes go through the server's /api/stream when it's reachable, or a hidden YouTube WebView anchored by a looping silent audio file when it isn't](./images/two-engines.svg)
+![Player architecture: downloaded files go straight to expo-audio; Spotify likes play through a hidden YouTube WebView anchored by a looping silent audio file, or through the server's /api/stream when server streaming is enabled and reachable](./images/two-engines.svg)
 
 **Downloaded files** play through `expo-audio`.
 
-**Spotify likes** first check whether the server is up (2.5 s timeout). If it is, the app calls a
-new endpoint, `/api/stream?q=artist title`. The server runs `yt-dlp "ytsearch1:artist title"`,
-saves the audio to a disk cache keyed by a hash of the query (60 files max, oldest evicted first),
-and serves it with `res.sendFile`, which handles range requests. Concurrent requests for the same
-song share one download.
-
-Before passing the URL to the native player, the app sends its own `Range: bytes=0-0` request
-with a 70 s timeout. That makes the server finish downloading first, so the player gets an
-immediate response instead of hitting its own, shorter timeout. If `expo-audio` still hasn't
-loaded after 20 s, the track falls back to the second engine.
-
-**The second engine** is a hidden WebView. It opens `m.youtube.com/results?search_query=…`, an
-injected script picks the first real result (skipping promoted videos and Shorts), and the app
-controls the `<video>` element through two globals, `__mdSetDesired('play' | 'pause')` and
-`__mdSeek(seconds)`. Once per second the script reports position, duration and whether an ad is
-playing, which is how the mini player can show *Anuncio*.
+**Spotify likes** play by default through a hidden WebView. It opens
+`m.youtube.com/results?search_query=…`, an injected script picks the first real result (skipping
+promoted videos and Shorts), and the app controls the `<video>` element through two globals,
+`__mdSetDesired('play' | 'pause')` and `__mdSeek(seconds)`. Once per second the script reports
+position, duration and whether an ad is playing, which is how the mini player can show *Anuncio*.
 
 My first attempt hid the WebView with `width: 0` and `display: none`, and Chromium wouldn't play
 anything. It now stays mounted at 360×640 with `opacity: 0`.
 
-![The full-screen player: large cover, serif title, scrubber with a rust handle, shuffle, previous, play, next, repeat and ±10 s](./images/screen-now-playing.png)
+**Server streaming** is an option in Ajustes. When it's on and the server answers a health check
+within 2.5 s, the app calls `/api/stream?q=artist title`. The server runs
+`yt-dlp "ytsearch1:artist title"`, saves the audio to a disk cache keyed by a hash of the query
+(60 files max, oldest evicted first), and serves it with `res.sendFile`, which handles range
+requests. Concurrent requests for the same song share one download.
+
+Before passing that URL to the native player, the app sends its own `Range: bytes=0-0` request
+with a 70 s timeout. That makes the server finish downloading first, so the player gets an
+immediate response instead of hitting its own, shorter timeout. If `expo-audio` still hasn't
+loaded after 20 s, the track falls back to the WebView.
+
+![The full-screen player: large cover, serif title, scrubber with a rust handle, ±10 s buttons next to the times, shuffle, previous, play, next, repeat, and a "Letra" bar at the bottom](./images/screen-now-playing.png)
+
+The full-screen player can also tint its background with the cover's color (Ajustes → Temas).
+`coverColor.ts` decodes the image in JavaScript (`jpeg-js` or `upng-js`), takes about 4,000
+samples and picks the most saturated hue, ignoring whites, blacks and greys. Averaging the pixels
+usually gives a muddy brown. The hue is then turned into a light pastel, whatever the cover looks
+like, so the dark text stays readable. Colors for the next tracks in the queue are computed
+ahead of time, so the background can fade to the new color as soon as the song changes.
 
 ## Keeping the WebView playing with the screen off
 
@@ -169,6 +185,11 @@ and cover. The audio mode is set to `mixWithOthers` so the silent track doesn't 
 from the WebView. Both stay in sync: when one pauses, so does the other, and a pause from the lock
 screen is forwarded to the WebView with `__mdSetDesired('pause')`.
 
+The same silent player now has a second job. With the screen off, Android suspends apps that
+don't have a foreground service, which used to stall bulk downloads of liked songs. During a
+batch download, if nothing is playing, the silent track starts with a "Descargando…" media
+notification, and the app keeps running and keeps network access until the batch ends.
+
 ## Buttons that lie
 
 In this version, `expo-audio` lock-screen controls only offer **seek backward** and **seek
@@ -198,10 +219,58 @@ song when it's past five seconds, the ten seconds it already rewound don't matte
 WebView engine, the jump is detected on the silent track, because that's the one the lock screen
 controls.
 
+## Lyrics
+
+Lyrics come from [LRCLIB](https://lrclib.net), a free API with no key. YouTube titles are noisy,
+so the query strips things like `(Official Video)` or `feat.`, tries splitting "Artist - Song",
+and prefers results with timestamps and a duration close to the song's.
+
+![The lyrics view: past lines faded, the current line large and dark, upcoming lines in mid grey, with the scrubber and a mini player at the bottom](./images/screen-lyrics.png)
+
+The lyrics view uses three levels: past lines faded, the current line large and dark, upcoming
+lines in mid grey. It follows the song until you scroll; then a "Línea actual" button appears,
+and following resumes on its own six seconds after you stop touching the screen. Tapping a line
+shows a button with its timestamp (▶ 2:55) that jumps there. Lyrics without timestamps get an
+approximate time based on the line's position in the song.
+
+Two caching rules: a cancelled request is never stored, and neither is a request where every call
+failed, which means no network rather than no lyrics. In both cases the song gets another chance
+next time.
+
+## Playlists that survive a reinstall
+
+The Música tab now has a third view, **Listas**, next to "Mis descargas" and "Todas". There's an
+automatic "Me Gustan" playlist: double-tapping the cover in the player adds or removes the song
+(with an undo toast), and a rust heart next to the title shows when it's in the list.
+
+A playlist entry doesn't depend on the song's file. It's keyed by the Spotify id, the download id
+or the external file id, and stores the title, artist and cover. If a file disappears, for
+example after reinstalling, the song stays in the list. If it's a Spotify like, it can be streamed or downloaded again; if
+there's no way to play it, it's skipped.
+
+Every change is backed up to the server (`PUT /api/library-backup`, 3 s debounce, only while the
+server is reachable). On a fresh install with no local playlists, the app restores the server
+backup. Until that restore has been attempted, nothing is uploaded. Otherwise a new install would
+overwrite a good backup with an empty list on its first sync.
+
+## Doing less when nobody's looking
+
+Music often plays for hours with the screen off, so the player avoids work nobody will see:
+
+- Native player events are handled outside React: end of track and lock-screen buttons work with
+  the screen on or off, but React state only updates while the app is in the foreground, and at
+  most once per interval except for important changes (play/pause, load, end).
+- Player events arrive once per second instead of the default 500 ms.
+- **Battery saver** (on by default) updates the progress bar every 2 s and freezes animations such
+  as the equalizer icon and loading dots.
+- **Offline mode** turns off everything that uses the network: server pings, syncs, downloads,
+  lyrics lookups, cover searches and YouTube. Only what's on the phone plays.
+
 ## Home-screen widgets
 
-MusicDown includes seven widget variants built with `react-native-android-widget`: 4×2 and 4×1
-(each solid, semi-translucent or transparent) and 2×2, with Fraunces bundled for the titles.
+MusicDown has nine widget variants built with `react-native-android-widget`: a 4×1 row and a 4×2
+medium layout (each solid, semi-translucent or transparent), 4×2 and 4×4 cover layouts, and a
+2×2 square, with Fraunces bundled for the titles.
 
 Widgets run in a separate headless task, so the player publishes the current track to a small
 bridge module that re-renders them and saves the state. After a cold start, the widget shows the
@@ -213,15 +282,15 @@ once the new one is ready.
 
 ## Smaller changes
 
-- **Synced lyrics** from [LRCLIB](https://lrclib.net), a free API with no key. The query strips
-  noise like `(Official Video)` or `feat.` from YouTube titles, tries splitting "Artist - Song",
-  and prefers results with timestamps and a matching duration. Cancelled requests are never
-  cached as "no lyrics".
 - **Private downloads by default**: files go to the app's private storage with a `.zc3` extension
   and aren't added to the system media library. Sharing a song sends a temporary
   `Artist - Title.mp3` copy. A setting in Ajustes restores the old behavior.
-- **Offline likes**: any liked song can be downloaded, individually or in bulk. A batch stops
-  after three consecutive failures, which usually means the server is down.
+- **Offline likes**: any liked song can be downloaded, individually or in bulk. The first YouTube
+  result for a search is sometimes an hour-long mix, so the server asks for eight candidates and
+  takes the first one between 45 seconds and 15 minutes long. A batch stops after three
+  consecutive failures, which usually means the server is down.
+- **Files from the Music folder** now show their real title, artist and cover. A small ID3v2
+  reader parses only the start of each file, where the tag lives, instead of the whole MP3.
 - **Server status**: the app pings the server on launch and when returning to the foreground, and
   disables features that depend on it. Local playback never does. `npm run start:tunnel` runs the
   server behind a Cloudflare quick tunnel, so the phone also works away from my home network.
@@ -237,6 +306,8 @@ sessions, window visibility, and notification buttons. Most of the fixes in this
 misleading one of those layers: a page that reports itself as visible, a silent file standing in
 for the music, a seek button acting as "next".
 
-One limitation remains. When a song falls back to the WebView engine, lock-screen controls only
-take effect once the app is back in the foreground, because React Native doesn't deliver commands
-to views while the app is paused. That's why the server path goes first.
+One limitation remains. With the WebView engine, lock-screen and widget controls only take
+effect once the app is back in the foreground, because React Native doesn't deliver commands to
+views while the app is paused. Server streaming doesn't have that problem, since `expo-audio`
+responds in the background, but it needs the server running. That's the trade-off behind the
+setting.
